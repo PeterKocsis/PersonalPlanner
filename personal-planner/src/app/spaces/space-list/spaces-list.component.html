@@ -1,0 +1,8 @@
+<div>
+    <app-create-space></app-create-space>
+</div>
+<div>
+    @for (space of spaces(); track space._id) {
+        <app-space [space]="space"></app-space>
+    }
+</div>
