@@ -1,8 +1,23 @@
-<div>
-    <app-create-space></app-create-space>
-</div>
-<div>
+
+<mat-nav-list>
+    <h2 matSubheader>Quick Access</h2>
+    <mat-divider></mat-divider>
+    <h2 matSubheader>Spaces</h2>
     @for (space of spaces(); track space._id) {
-        <app-space [space]="space"></app-space>
+        <mat-list-item>
+            <a matListItemTitle>{{space.displayName}}</a>
+            <span matListItemMeta>
+                <button mat-icon-button>
+                    <mat-icon>edit</mat-icon>
+                </button>
+                <button mat-icon-button>
+                    <mat-icon color="accent">delete</mat-icon>
+                </button>
+            </span>
+        </mat-list-item>
     }
-</div>
+    <mat-divider></mat-divider>
+    <h2>Configurations</h2>
+    <a mat-list-item routerLink="/manage-spaces">Manage Spaces</a>
+    <a mat-list-item routerLink="/settings">Settings</a>
+</mat-nav-list>
