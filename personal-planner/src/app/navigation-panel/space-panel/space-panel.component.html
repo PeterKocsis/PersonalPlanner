@@ -1,11 +1,8 @@
 
 <mat-nav-list>
-    <h2 matSubheader>Quick Access</h2>
-    <mat-divider></mat-divider>
-    <h2 matSubheader>Spaces</h2>
     @for (space of spaces(); track space._id) {
-        <mat-list-item>
-            <a matListItemTitle>{{space.displayName}}</a>
+        <mat-list-item [routerLink]="['/spaces', space._id]" routerLinkActive="selected">
+            <a matListItemTitle >{{space.displayName}}</a>
             <span matListItemMeta>
                 <button mat-icon-button>
                     <mat-icon>edit</mat-icon>
@@ -16,8 +13,4 @@
             </span>
         </mat-list-item>
     }
-    <mat-divider></mat-divider>
-    <h2>Configurations</h2>
-    <a mat-list-item routerLink="/manage-spaces">Manage Spaces</a>
-    <a mat-list-item routerLink="/settings">Settings</a>
 </mat-nav-list>

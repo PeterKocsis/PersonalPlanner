@@ -1,13 +1,12 @@
 
 <div id="app-root-content" >
-    <app-header></app-header>
+    <app-header (sideNavOpen)="drawer.toggle()"></app-header>
     <mat-drawer-container>
-        <mat-drawer #drawer mode="side" opened style="padding-left: 2rem;">
-            <app-spaces-list></app-spaces-list>
+        <mat-drawer #drawer mode="side" style="padding-left: 2rem;">
+            <app-navigation-panel></app-navigation-panel>
         </mat-drawer>
         
-        <mat-drawer-content>
-            <p>Opened section</p>
+        <mat-drawer-content style="padding: 2rem;">
             <router-outlet></router-outlet>
         </mat-drawer-content>
     </mat-drawer-container>

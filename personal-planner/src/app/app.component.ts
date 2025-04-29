@@ -1,15 +1,16 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { SpaceListComponent } from './spaces/space-list/spaces-list.component';
+import { SpacePanelComponent } from './navigation-panel/space-panel/space-panel.component';
 import { MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { HeaderComponent } from './header/header.component';
+import { NavigationPanelComponent } from './navigation-panel/navigation-panel.component';
 
 @Component({
   selector: 'app-root',
   imports: [
     RouterOutlet,
-    SpaceListComponent,
+    NavigationPanelComponent,
     MatSidenavModule,
     MatIconModule,
     HeaderComponent,
