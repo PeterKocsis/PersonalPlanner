@@ -5,10 +5,10 @@
             <a matListItemTitle >{{space.displayName}}</a>
             <span matListItemMeta>
                 <button mat-icon-button>
-                    <mat-icon>edit</mat-icon>
+                    <mat-icon color="primary">edit</mat-icon>
                 </button>
-                <button mat-icon-button>
-                    <mat-icon color="accent">delete</mat-icon>
+                <button mat-icon-button (click)="onDeleteSpace(space._id)">
+                    <mat-icon >delete</mat-icon>
                 </button>
             </span>
         </mat-list-item>

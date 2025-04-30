@@ -1,4 +1,4 @@
-import { Component, inject, OnInit } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { SpacesService } from '../../../services/spaces.service';
 import {
   MatListItemMeta,
@@ -30,11 +30,11 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
   templateUrl: './space-panel.component.html',
   styleUrl: './space-panel.component.scss',
 })
-export class SpacePanelComponent implements OnInit {
+export class SpacePanelComponent {
   private spacesService = inject(SpacesService);
   spaces = this.spacesService.spaces;
 
-  ngOnInit(): void {
-    this.spacesService.updateSpaces();
+  onDeleteSpace(spaceId: string) {
+    this.spacesService.deleteSpace(spaceId);
   }
 }

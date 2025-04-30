@@ -4,7 +4,9 @@ const bodyParser = require('body-parser');
 const app = express();
 const mongoose = require('mongoose');
 const Space = require('./models/space');
+const SpacePriority = require('./models/spacePriority');
 const config = require('./configuration-values');
+const spacePriority = require('./models/spacePriority');
 
 mongoose.connect(config.connectionString)
     .then(() => {
@@ -26,27 +28,68 @@ app.use((req, res, next) => {
 
 app.post('/api/spaces', (req, res, next) => {
     const space = req.body;
+    console.log('Received displayName:', space);
     const newSpace = new Space({
-        displayName: space.displayName,
-        vision: space.vision,
-        color: space.color,
-        icon: space.icon
+        displayName: space.displayName
     });
-    newSpace.save()
-        .then((result) => {
-            res.status(201).json({
-                message: `Space created successfully with id: ${result._id}!`,
-                spaceId: result._id
+    SpacePriority.find().then((spacePriority) => {
+        console.log('Space priority:', spacePriority);
+        if (spacePriority.length === 0) {
+            const newSpacePriority = new SpacePriority({
+                spaceList: []
             });
-        })
-        .catch(error => {
-            console.error('Error creating space:', error);
-        });
+            newSpacePriority.spaceList.push(newSpace._id);
+            newSpacePriority.save()
+                .then(() => {
+                    console.log('Space priority created successfully!');
+                })
+                .catch(error => {
+                    console.error('Error creating space priority:', error);
+                });
+        } else {
+            spacePriority[0].spaceList.push(newSpace._id);
+            spacePriority[0].save()
+                .then(() => {
+                    newSpace.save()
+                        .then((space) => {
+                            res.status(201).json({
+                                message: `Space created successfully with id: ${space._id}!`,
+                                newSpace: space
+                            });
+                        })
+                        .catch(error => {
+                            console.error('Error creating space:', error);
+                        });
+                    console.log('Space priority updated successfully!');
+                })
+                .catch(error => {
+                    console.error('Error updating space priority:', error);
+                });
+            
+        }
+    });
 });
 
 app.delete('/api/spaces/:id', (req, res, next) => {
     Space.deleteOne({ _id: req.params.id })
         .then(() => {
+            SpacePriority.find()
+                .then((spacePriority) => {
+                    const index = spacePriority[0].spaceList.indexOf(req.params.id);
+                    if (index > -1) {
+                        spacePriority[0].spaceList.splice(index, 1);
+                    }
+                    spacePriority[0].save()
+                        .then(() => {
+                            console.log('Space priority updated successfully!');
+                        })
+                        .catch(error => {
+                            console.error('Error updating space priority:', error);
+                        });
+                })
+                .catch(error => {
+                    console.error('Error finding space priority:', error);
+                });
             res.status(200).json({
                 message: 'Space deleted successfully!'
             });
@@ -59,14 +102,59 @@ app.delete('/api/spaces/:id', (req, res, next) => {
         });
 });
 
+app.put('/api/spacePriority', (req, res, next) => {
+    const spacePrioList = req.body;
+    console.log('Received space priority:', spacePrioList);
+    SpacePriority.find()
+        .then((spacePriorityDoc) => {
+            if (spacePriorityDoc.length > 0) {
+                spacePriorityDoc[0].spaceList = spacePrioList;
+                spacePriorityDoc[0].save()
+                    .then(() => {
+                        res.status(200).json({
+                            message: 'Space priority updated successfully!'
+                        });
+                    })
+                    .catch(error => {
+                        console.error('Error updating space priority:', error);
+                        res.status(500).json({
+                            message: 'Error updating space priority'
+                        });
+                    });
+            } else {
+                res.status(404).json({
+                    message: 'Space priority not found'
+                });
+            }
+        })
+        .catch(error => {
+            console.error('Error finding space priority:', error);
+            res.status(500).json({
+                message: 'Error finding space priority'
+            });
+        });
+    
+})
+
 
 app.get('/api/spaces', (req, res, next) => {
     Space.find()
         .then(spaces => {
-            res.status(200).json({
-                message: 'Spaces fetched successfully!',
-                spaces: spaces
-            });
+            SpacePriority.find()
+            .then((spacePriority) => {
+                const sortedSpaces = [];
+                spacePriority[0].spaceList.forEach((spaceId) => {
+                    const space = spaces.find(space => space._id.toString() === spaceId.toString());
+                    if (space) {
+                        sortedSpaces.push(space);
+                    }
+                });
+                console.log('Sorted spaces:', sortedSpaces);
+                res.status(200).json({
+                    message: 'Spaces fetched successfully!',
+                    spaces: sortedSpaces
+                });
+            })
         })
         .catch(error => {
             console.error('Error fetching spaces:', error);

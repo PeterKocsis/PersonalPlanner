@@ -2,27 +2,28 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, OnInit, signal } from '@angular/core';
 import { BehaviorSubject, map, Subject, Subscription } from 'rxjs';
 import { ISpace } from '../app/interfaces/space.interface';
+import { Q } from '@angular/cdk/keycodes';
 
 @Injectable({
   providedIn: 'root',
 })
-export class SpacesService implements OnInit {
+export class SpacesService {
   private subscriptions: Subscription[] = [];
   public spaces = signal<ISpace[]>([]);
   private _spaces$ = new BehaviorSubject<ISpace[]>([]);
   spaces$ = this._spaces$.asObservable();
 
-  constructor(private http: HttpClient) {}
-  ngOnInit(): void {
-    this.updateSpaces();
+  constructor(private http: HttpClient) {
+    this.getSpaces();
   }
 
-  updateSpaces() {
+  getSpaces() {
     this.subscriptions.push(
       this.http
         .get<{ spaces: ISpace[] }>('http://localhost:3000/api/spaces')
         .subscribe({
           next: (data) => {
+            console.log('Fetched spaces:', data.spaces);
             this.spaces.update((old) => (old = data.spaces));
             this._spaces$.next(data.spaces);
           },
@@ -33,16 +34,15 @@ export class SpacesService implements OnInit {
     );
   }
 
-  addSpace(space: ISpace) {
+  addSpace(spaceName: string) {
     this.http
-      .post<{ message: string; spaceId: string }>(
+      .post<{ message: string; newSpace: ISpace }>(
         'http://localhost:3000/api/spaces',
-        space
+        { displayName: spaceName }
       )
       .subscribe({
         next: (data) => {
-          const savedSpace = { ...space, _id: data.spaceId };
-          this.spaces.update((old) => (old = [...old, savedSpace]));
+          this.spaces.update((old) => (old = [...old, data.newSpace]));
         },
         error: (error) => {
           console.error('Error creating space:', error);
@@ -59,6 +59,17 @@ export class SpacesService implements OnInit {
       },
       error: (error) => {
         console.error('Error deleting space:', error);
+      },
+    });
+  }
+
+  updateSpacePriorityList(spaces: ISpace[]) {
+    this.http.put('http://localhost:3000/api/spacePriority', spaces.map(space => space._id)).subscribe({
+      next: (data) => {
+        this.spaces.update((old) => (old = spaces));
+      },
+      error: (error) => {
+        console.error('Error updating space priority:', error);
       },
     });
   }

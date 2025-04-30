@@ -1,1 +1,14 @@
-<p>space-manager works!</p>
+<form>
+    <mat-form-field appearance="fill">
+        <mat-label>Space Name</mat-label>
+        <input matInput [(ngModel)]="newSpaceName" name="spaceName" required>
+    </mat-form-field>
+
+    <button mat-raised-button color="primary" (click)="addSpace()">Add Space</button>
+</form>
+
+<div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+    @for (space of spaces(); track space; let i = $index) {
+      <div class="example-box" cdkDrag>{{ (i + 1) + ". " + space.displayName}}</div>
+    }
+</div>
