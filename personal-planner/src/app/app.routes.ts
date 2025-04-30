@@ -5,6 +5,7 @@ import { SpaceViewComponent } from './space-view/sspace-view.component';
 import { SettingsComponent } from './settings/settings.component';
 import { InboxComponent } from './inbox/inbox.component';
 import { PlannerComponent } from './planner/planner.component';
+import { UpcomingComponent } from './upcoming/upcoming.component';
 
 export const routes: Routes = [
   { path: '', component: TodayComponent },
@@ -14,4 +15,5 @@ export const routes: Routes = [
   { path: 'spaces/:spaceId', component: SpaceViewComponent },
   { path: 'inbox', component: InboxComponent },
   { path: 'planner', component: PlannerComponent },
+  { path: 'upcoming', component: UpcomingComponent },
 ];
