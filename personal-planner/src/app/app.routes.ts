@@ -4,6 +4,7 @@ import { SpaceManagerComponent } from './space-manager/space-manager.component';
 import { SpaceViewComponent } from './space-view/sspace-view.component';
 import { SettingsComponent } from './settings/settings.component';
 import { InboxComponent } from './inbox/inbox.component';
+import { PlannerComponent } from './planner/planner.component';
 
 export const routes: Routes = [
   { path: '', component: TodayComponent },
@@ -12,4 +13,5 @@ export const routes: Routes = [
   { path: 'settings', component: SettingsComponent },
   { path: 'spaces/:spaceId', component: SpaceViewComponent },
   { path: 'inbox', component: InboxComponent },
+  { path: 'planner', component: PlannerComponent },
 ];
