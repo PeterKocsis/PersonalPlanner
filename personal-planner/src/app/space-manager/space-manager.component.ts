@@ -1,5 +1,9 @@
 import { Component, inject, OnInit } from '@angular/core';
-import { CdkDragDrop, DragDropModule, moveItemInArray } from '@angular/cdk/drag-drop';
+import {
+  CdkDragDrop,
+  DragDropModule,
+  moveItemInArray,
+} from '@angular/cdk/drag-drop';
 import { SpacesService } from '../../services/spaces.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
@@ -9,25 +13,30 @@ import { MatButton } from '@angular/material/button';
 
 @Component({
   selector: 'app-space-manager',
-  imports: [MatFormFieldModule, DragDropModule, MatInput, FormsModule, MatButton],
+  imports: [
+    MatFormFieldModule,
+    DragDropModule,
+    MatInput,
+    FormsModule,
+    MatButton,
+  ],
   templateUrl: './space-manager.component.html',
   styleUrl: './space-manager.component.scss',
 })
 export class SpaceManagerComponent {
-
   spaceService = inject(SpacesService);
   spaces = this.spaceService.spaces;
   newSpaceName: string = '';
 
   drop(event: any) {
-    const spaceCopy = [...this.spaces()]
+    const spaceCopy = [...this.spaces()];
     moveItemInArray(spaceCopy, event.previousIndex, event.currentIndex);
     this.spaceService.updateSpacePriorityList(spaceCopy);
   }
 
   addSpace() {
     if (this.newSpaceName) {
-      this.spaceService.addSpace(this.newSpaceName)
+      this.spaceService.addSpace(this.newSpaceName);
     }
   }
 }
