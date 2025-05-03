@@ -1,18 +1,22 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable, OnInit, signal } from '@angular/core';
-import { BehaviorSubject, map, Subject, Subscription } from 'rxjs';
+import { BehaviorSubject, filter, map, Subject, Subscription } from 'rxjs';
 import { ISpace } from '../app/interfaces/space.interface';
-import { Q } from '@angular/cdk/keycodes';
+import { toSignal } from '@angular/core/rxjs-interop';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SpacesService {
   private subscriptions: Subscription[] = [];
-  public spaces = signal<ISpace[]>([]);
-  private _spaces$ = new BehaviorSubject<ISpace[]>([]);
-  spaces$ = this._spaces$.asObservable();
-
+  private _allSpaces$ = new BehaviorSubject<ISpace[]>([]);
+  allSpaces$ = this._allSpaces$.asObservable();
+  private _inboxSpace = this.allSpaces$.pipe(
+    map((space) => space.filter((s) => s.displayName === 'Inbox')[0])
+  );
+  public userSpaces = this.allSpaces$.pipe(map((spaces) => spaces.filter((s) => s.displayName !== 'Inbox')));
+  public spaces = toSignal(this.userSpaces, { initialValue: [] });
+  public inboxSpace = toSignal(this._inboxSpace, { initialValue: null });
   constructor(private http: HttpClient) {
     this.getSpaces();
   }
@@ -24,8 +28,7 @@ export class SpacesService {
         .subscribe({
           next: (data) => {
             console.log('Fetched spaces:', data.spaces);
-            this.spaces.update((old) => (old = data.spaces));
-            this._spaces$.next(data.spaces);
+            this._allSpaces$.next(data.spaces);
           },
           error: (error) => {
             console.error('Error fetching spaces:', error);
@@ -42,7 +45,7 @@ export class SpacesService {
       )
       .subscribe({
         next: (data) => {
-          this.spaces.update((old) => (old = [...old, data.newSpace]));
+          this._allSpaces$.next([...this._allSpaces$.getValue(), data.newSpace]);
         },
         error: (error) => {
           console.error('Error creating space:', error);
@@ -53,9 +56,8 @@ export class SpacesService {
   deleteSpace(id: string) {
     this.http.delete(`http://localhost:3000/api/spaces/${id}`).subscribe({
       next: (data) => {
-        this.spaces.update(
-          (old) => (old = old.filter((space) => space._id !== id))
-        );
+        this._allSpaces$.next(
+          this._allSpaces$.getValue().filter((space) => space._id !== id))
       },
       error: (error) => {
         console.error('Error deleting space:', error);
@@ -64,13 +66,18 @@ export class SpacesService {
   }
 
   updateSpacePriorityList(spaces: ISpace[]) {
-    this.http.put('http://localhost:3000/api/spacePriority', spaces.map(space => space._id)).subscribe({
-      next: (data) => {
-        this.spaces.update((old) => (old = spaces));
-      },
-      error: (error) => {
-        console.error('Error updating space priority:', error);
-      },
-    });
+    this.http
+      .put(
+        'http://localhost:3000/api/spacePriority',
+        spaces.map((space) => space._id)
+      )
+      .subscribe({
+        next: (data) => {
+          this._allSpaces$.next(spaces);
+        },
+        error: (error) => {
+          console.error('Error updating space priority:', error);
+        },
+      });
   }
 }

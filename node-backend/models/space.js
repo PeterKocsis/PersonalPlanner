@@ -7,4 +7,6 @@ const spaceSchema = mongoose.Schema({
     icon: { type: String, default: '' },
 });
 
-module.exports = mongoose.model('Space', spaceSchema);
+const model = mongoose.model('Space', spaceSchema);
+
+module.exports = model;

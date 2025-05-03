@@ -3,5 +3,5 @@ export interface ITask {
   title: string;
   description?: string;
   createdAt?: Date;
-  assignedContainerId: string;
+  spaceId: string;
 }

@@ -1,14 +1,1 @@
-<form>
-    <mat-form-field appearance="fill">
-        <mat-label>Task Title</mat-label>
-        <input matInput [(ngModel)]="newTaskTitle" name="taskTitle" required>
-    </mat-form-field>
-
-    <button mat-raised-button color="primary" (click)="onAddTask()">Add Task</button>
-</form>
-
-<div cdkDropList class="example-list" (cdkDropListDropped)="onDrop($event)">
-    @for (task of tasks; track task._id; let i = $index) {
-      <div class="example-box" cdkDrag>{{ task.title}}</div>
-    }
-</div>
+<app-space-view [spaceId]="containerId()!"></app-space-view>
