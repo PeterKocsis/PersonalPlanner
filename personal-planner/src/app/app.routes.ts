@@ -8,17 +8,19 @@ import { PlannerComponent } from './planner/planner.component';
 import { UpcomingComponent } from './upcoming/upcoming.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { LoginComponent } from './auth/login/login.component';
+import { authGuard } from './auth/auth.guard';
 
 export const routes: Routes = [
-  { path: '', component: TodayComponent },
-  { path: 'today', component: TodayComponent },
-  { path: 'manage-spaces', component: SpaceManagerComponent },
-  { path: 'settings', component: SettingsComponent },
-  { path: 'spaces/:spaceId', component: SpaceViewComponent },
-  { path: 'inbox', component: InboxComponent },
-  { path: 'planner', component: PlannerComponent },
-  { path: 'upcoming', component: UpcomingComponent },
+  { path: '', component: TodayComponent, canActivate: [authGuard], pathMatch: 'full' },
+  { path: 'today', component: TodayComponent, canActivate: [authGuard], pathMatch: 'full' },
+  { path: 'manage-spaces', component: SpaceManagerComponent, canActivate: [authGuard], pathMatch: 'full' },
+  { path: 'settings', component: SettingsComponent, canActivate: [authGuard], pathMatch: 'full' },
+  { path: 'spaces/:spaceId', component: SpaceViewComponent, canActivate: [authGuard], pathMatch: 'full' },
+  { path: 'inbox', component: InboxComponent, canActivate: [authGuard], pathMatch: 'full' },
+  { path: 'planner', component: PlannerComponent, canActivate: [authGuard], pathMatch: 'full' },
+  { path: 'upcoming', component: UpcomingComponent, canActivate: [authGuard], pathMatch: 'full' },
   { path: 'auth/signup', component: SignupComponent },
   { path: 'auth/login', component: LoginComponent },
+  { path: '**', component: LoginComponent, canActivate: [authGuard], pathMatch: 'full' }, // Redirect to login for any unknown routes
 
 ];
