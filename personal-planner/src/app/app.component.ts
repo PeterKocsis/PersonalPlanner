@@ -1,4 +1,4 @@
-import { Component, effect, inject, ViewChild } from '@angular/core';
+import { Component, effect, inject, OnInit, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
@@ -18,12 +18,12 @@ import { AuthService } from './auth/auth.service';
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'personal-planner';
 
   private authService = inject(AuthService);
   isLoggedIn = this.authService.isLoggedInSignal();
-  @ViewChild('drawer') navigationPanel!: MatDrawer;
+  @ViewChild('drawer', { static: true}) navigationPanel!: MatDrawer;
 
   constructor() {
     effect(() => {
@@ -34,6 +34,16 @@ export class AppComponent {
         this.navigationPanel.close();
       }
     });
+  }
+  
+  ngOnInit(): void {
+    this.authService.autoLogin();
+    if(this.authService.isLoggedInSignal()) {
+      this.navigationPanel.open();
+    }
+    else {
+      this.navigationPanel.close();
+    }
   }
 
 }
