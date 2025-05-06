@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/task');
+const checkAuth = require('../middleware/check-auth');
 
-router.get('', (req, res, next) => {
+router.get('', checkAuth, (req, res, next) => {
     Task.find()
         .then(tasks => {
             res.status(200).json({
@@ -18,7 +19,7 @@ router.get('', (req, res, next) => {
         });
 })
 
-router.post('', (req, res, next) => {
+router.post('', checkAuth, (req, res, next) => {
     const task = req.body;
     console.log('Received task:', task);
     const newTask = new Task({
@@ -41,7 +42,7 @@ router.post('', (req, res, next) => {
         });
 }
 );
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', checkAuth, (req, res, next) => {
     Task.deleteOne({ _id: req.params.id })
         .then(() => {
             res.status(200).json({

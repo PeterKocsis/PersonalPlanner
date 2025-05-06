@@ -1,8 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const SpacePriority = require('../models/spacePriority');
+const checkAuth = require('../middleware/check-auth');
 
-router.put('', (req, res, next) => {
+router.put('', checkAuth, (req, res, next) => {
     const spacePrioList = req.body;
     console.log('Received space priority:', spacePrioList);
     SpacePriority.find()

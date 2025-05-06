@@ -1,15 +1,15 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { effect, inject, Injectable, signal } from '@angular/core';
 import { ITask } from '../app/interfaces/task.interface';
 import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthService } from '../app/auth/auth.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class TaskService {
 
-  private http = inject(HttpClient);
   tasks$ = new BehaviorSubject<ITask[]>([]);
   tasks = toSignal(this.tasks$, { initialValue: [] });
 
@@ -44,7 +44,11 @@ export class TaskService {
   }
     
 
-  constructor() {
-    this.getAllTask();
+  constructor(private http: HttpClient, private authService: AuthService) {
+    effect(() => {
+      if (this.authService.isLoggedInSignal()) {
+        this.getAllTask();
+      }
+    });
   }
 }

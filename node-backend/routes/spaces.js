@@ -2,8 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Space = require('../models/space');
 const SpacePriority = require('../models/spacePriority');
+const checkAuth = require('../middleware/check-auth');
 
-router.post('', (req, res, next) => {
+router.post('', checkAuth, (req, res, next) => {
     const space = req.body;
     console.log('Received displayName:', space);
     const newSpace = new Space({
@@ -47,7 +48,7 @@ router.post('', (req, res, next) => {
     });
 });
 
-router.delete('/:id', (req, res, next) => {
+router.delete('/:id', checkAuth, (req, res, next) => {
     Space.deleteOne({ _id: req.params.id })
         .then(() => {
             SpacePriority.find()
@@ -79,7 +80,7 @@ router.delete('/:id', (req, res, next) => {
         });
 });
 
-router.get('', (req, res, next) => {
+router.get('', checkAuth, (req, res, next) => {
     Space.find()
         .then(spaces => {
             SpacePriority.find()

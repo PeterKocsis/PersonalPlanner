@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, effect, inject, ViewChild } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { SpacePanelComponent } from './navigation-panel/space-panel/space-panel.component';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { HeaderComponent } from './header/header.component';
 import { NavigationPanelComponent } from './navigation-panel/navigation-panel.component';
+import { AuthService } from './auth/auth.service';
 
 @Component({
   selector: 'app-root',
@@ -20,4 +20,20 @@ import { NavigationPanelComponent } from './navigation-panel/navigation-panel.co
 })
 export class AppComponent {
   title = 'personal-planner';
+
+  private authService = inject(AuthService);
+  isLoggedIn = this.authService.isLoggedInSignal();
+  @ViewChild('drawer') navigationPanel!: MatDrawer;
+
+  constructor() {
+    effect(() => {
+      if(this.authService.isLoggedInSignal()) {
+        this.navigationPanel.open();
+      }
+      else {
+        this.navigationPanel.close();
+      }
+    });
+  }
+
 }

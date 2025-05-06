@@ -1,0 +1,38 @@
+<!-- A signup form with two input fields. One should be for email address and one should be for password user input 
+and a button to submit the form. The form should be styled using Angular Material components.
+The form should also have validation to ensure that the email address is in the correct format and that the password is at least 6 characters long. 
+When the form is submitted, it should call a method in the component class to handle the signup process.
+The component should also have a method to handle the signup process, which should include calling a service to send the signup request to the server.
+-->
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>Sign Up</mat-card-title>
+        <mat-card-subtitle>Create a new account</mat-card-subtitle>
+    </mat-card-header>
+    <mat-card-content>
+        <form (ngSubmit)="onSubmit(signupForm)" #signupForm="ngForm">
+            <mat-form-field [color]="'primary'" appearance="fill">
+              <mat-label>Email</mat-label>
+              <input #emailInput="ngModel" matInput type="email" ngModel name="email" required email>
+              <mat-error *ngIf="emailInput?.invalid && (emailInput?.dirty || emailInput?.touched)">
+                <span *ngIf="emailInput?.errors?.['required']">Email is required.</span>
+                <span *ngIf="emailInput?.errors?.['email']">Invalid email format.</span>
+              </mat-error>
+            </mat-form-field>
+          
+            <mat-form-field appearance="fill">
+              <mat-label>Password</mat-label>
+              <input matInput type="password" ngModel name="password" required minlength="6" #passwordInput="ngModel">
+              <mat-error *ngIf="passwordInput?.invalid && (passwordInput?.dirty || passwordInput?.touched)">
+                <span *ngIf="passwordInput.errors?.['required']">Password is required.</span>
+                <span *ngIf="passwordInput?.errors?.['minlength']">Password must be at least 6 characters long.</span>
+              </mat-error>
+            </mat-form-field>
+          
+            <button mat-raised-button color="primary" type="submit" [disabled]="signupForm.invalid">Sign Up</button>
+          </form>
+    </mat-card-content>
+    <mat-card-actions>
+        <button mat-button color="primary" routerLink="/auth/login">Already have an account? Log In</button>
+    </mat-card-actions>
+</mat-card>

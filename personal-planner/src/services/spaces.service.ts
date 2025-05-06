@@ -1,8 +1,9 @@
 import { HttpClient } from '@angular/common/http';
-import { Injectable, OnInit, signal } from '@angular/core';
+import { effect, Injectable, OnInit, signal } from '@angular/core';
 import { BehaviorSubject, filter, map, Subject, Subscription } from 'rxjs';
 import { ISpace } from '../app/interfaces/space.interface';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { AuthService } from '../app/auth/auth.service';
 
 @Injectable({
   providedIn: 'root',
@@ -17,8 +18,12 @@ export class SpacesService {
   public userSpaces = this.allSpaces$.pipe(map((spaces) => spaces.filter((s) => s.displayName !== 'Inbox')));
   public spaces = toSignal(this.userSpaces, { initialValue: [] });
   public inboxSpace = toSignal(this._inboxSpace, { initialValue: null });
-  constructor(private http: HttpClient) {
-    this.getSpaces();
+  constructor(private http: HttpClient, private authService: AuthService) {
+    effect(() => {
+      if (this.authService.isLoggedInSignal()) {
+        this.getSpaces();
+      }
+    });
   }
 
   getSpaces() {

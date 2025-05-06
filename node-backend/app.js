@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const spacesRoutes = require('./routes/spaces');
 const tasksRoutes = require('./routes/tasks');
 const spacePriorityRoutes = require('./routes/space-priority');
+const userRoutes = require('./routes/user');
 
 const app = express();
 const mongoose = require('mongoose');
@@ -22,7 +23,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 
 app.use((req, res, next) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept');
+    res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
     next();
 });
@@ -30,6 +31,7 @@ app.use((req, res, next) => {
 app.use('/api/spaces', spacesRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/spacePriority', spacePriorityRoutes);
+app.use('/api/user', userRoutes);
 
 
 module.exports = app;
