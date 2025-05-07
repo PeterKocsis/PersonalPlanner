@@ -8,56 +8,43 @@ router.post('', checkAuth, (req, res, next) => {
     const space = req.body;
     console.log('Received displayName:', space);
     const newSpace = new Space({
-        displayName: space.displayName
+        displayName: space.displayName,
+        ownerID: req.userData.userId
     });
-    SpacePriority.find().then((spacePriority) => {
+    SpacePriority.findOne({ownerID: req.userData.userId}).then((spacePriority) => {
         console.log('Space priority:', spacePriority);
-        if (spacePriority.length === 0) {
-            const newSpacePriority = new SpacePriority({
-                spaceList: []
-            });
-            newSpacePriority.spaceList.push(newSpace._id);
-            newSpacePriority.save()
-                .then(() => {
-                    console.log('Space priority created successfully!');
-                })
-                .catch(error => {
-                    console.error('Error creating space priority:', error);
-                });
-        } else {
-            spacePriority[0].spaceList.push(newSpace._id);
-            spacePriority[0].save()
-                .then(() => {
-                    newSpace.save()
-                        .then((space) => {
-                            res.status(201).json({
-                                message: `Space created successfully with id: ${space._id}!`,
-                                newSpace: space
-                            });
-                        })
-                        .catch(error => {
-                            console.error('Error creating space:', error);
+        spacePriority.spaceList.push(newSpace._id);
+        spacePriority.save()
+            .then(() => {
+                newSpace.save()
+                    .then((space) => {
+                        res.status(201).json({
+                            message: `Space created successfully with id: ${space._id}!`,
+                            newSpace: space
                         });
-                    console.log('Space priority updated successfully!');
-                })
-                .catch(error => {
-                    console.error('Error updating space priority:', error);
-                });
+                    })
+                    .catch(error => {
+                        console.error('Error creating space:', error);
+                    });
+                console.log('Space priority updated successfully!');
+            })
+            .catch(error => {
+                console.error('Error updating space priority:', error);
+            });
             
-        }
     });
 });
 
 router.delete('/:id', checkAuth, (req, res, next) => {
-    Space.deleteOne({ _id: req.params.id })
+    Space.deleteOne({ _id: req.params.id, ownerID: req.userData.userId })
         .then(() => {
-            SpacePriority.find()
+            SpacePriority.findOne({ ownerID: req.userData.userId })
                 .then((spacePriority) => {
-                    const index = spacePriority[0].spaceList.indexOf(req.params.id);
+                    const index = spacePriority.spaceList.indexOf(req.params.id);
                     if (index > -1) {
                         spacePriority[0].spaceList.splice(index, 1);
                     }
-                    spacePriority[0].save()
+                    spacePriority.save()
                         .then(() => {
                             console.log('Space priority updated successfully!');
                         })
@@ -81,12 +68,12 @@ router.delete('/:id', checkAuth, (req, res, next) => {
 });
 
 router.get('', checkAuth, (req, res, next) => {
-    Space.find()
+    Space.find({ ownerID: req.userData.userId })
         .then(spaces => {
-            SpacePriority.find()
+            SpacePriority.findOne({ ownerID: req.userData.userId})
             .then((spacePriority) => {
                 const sortedSpaces = [];
-                spacePriority[0].spaceList.forEach((spaceId) => {
+                spacePriority.spaceList.forEach((spaceId) => {
                     const space = spaces.find(space => space._id.toString() === spaceId.toString());
                     if (space) {
                         sortedSpaces.push(space);

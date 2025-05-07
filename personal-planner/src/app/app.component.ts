@@ -38,12 +38,6 @@ export class AppComponent implements OnInit {
   
   ngOnInit(): void {
     this.authService.autoLogin();
-    if(this.authService.isLoggedInSignal()) {
-      this.navigationPanel.open();
-    }
-    else {
-      this.navigationPanel.close();
-    }
   }
 
 }

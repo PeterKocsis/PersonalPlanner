@@ -4,7 +4,8 @@ module.exports = (req, res, next) => {
     try {
         const token = req.headers.authorization.split(' ')[1];
         console.log('Token:', token);
-        jwt.verify(token, 'This is a secret phrase and should be much longer and more secure');
+        const decodedToken = jwt.verify(token, 'This is a secret phrase and should be much longer and more secure');
+        req.userData = { email: decodedToken.email, userId: decodedToken.userId };
         next();
     } catch (error) {
         console.error('Error verifying token:', error);
