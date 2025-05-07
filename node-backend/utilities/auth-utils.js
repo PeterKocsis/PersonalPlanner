@@ -1,0 +1,1 @@
+module.exports = defaultSecret = 'This is a secret phrase and should be much longer and more secure';

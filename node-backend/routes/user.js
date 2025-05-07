@@ -5,76 +5,87 @@ const jwt = require('jsonwebtoken');
 const router = express.Router();
 const SpacePriority = require('../models/spacePriority');
 const mongoose = require('mongoose');
+const Space = require('../models/space')
+const { body, validationResult } = require('express-validator');
+const rateLimit = require('express-rate-limit');
+const defaultSecret = require('../utilities/auth-utils')
 
-router.post('/signup', async (req, res, next) => {
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 10, // Limit each IP to 10 login requests per windowMs
+    message: 'Too many login attempts, please try again later'
+});
+
+const generateToken = (user) => {
+    return jwt.sign(
+        { email: user.email, userId: user._id },
+        process.env.JWT_SECRET || defaultSecret,
+        { expiresIn: '1h' }
+    );
+};
+
+
+router.post('/signup', [
+    body('email').isEmail().withMessage('Invalid email address'),
+    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+], async (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+    }
+
     const session = await mongoose.startSession();
     session.startTransaction();
 
     try {
-        // Hash the password
         const hash = await bcrypt.hash(req.body.password, 10);
 
-        // Create the user
-        const user = new User({
-            email: req.body.email,
-            password: hash
-        });
-        
-        // Save the user within the transaction
+        const user = new User({ email: req.body.email, password: hash });
         const savedUser = await user.save({ session });
-        
-        // Create the SpacePriority
-        const spacePrio = new SpacePriority({
-            spaceList: [],
-            ownerID: savedUser._id
-        });
-        // Save the SpacePriority within the transaction
+
+        const spacePrio = new SpacePriority({ spaceList: [], ownerID: savedUser._id });
         await spacePrio.save({ session });
 
-        // Commit the transaction
         await session.commitTransaction();
+        session.endSession();
 
         res.status(201).json({
             message: 'User created successfully!',
-            result: savedUser
+            result: { email: savedUser.email, id: savedUser._id }
         });
     } catch (err) {
-        // Abort the transaction in case of an error
         await session.abortTransaction();
-
-        console.error('Error creating user:', err);
-        res.status(500).json({
-            error: err
-        });
-    } finally {
         session.endSession();
+
+        console.log('Failed to create user');
+        res.status(500).json({
+            message: err?.message || 'Internal server error',
+        })
     }
 });
 
-router.post('/login', async (req, res, next) => {
-    let fetchedUser;
+router.post('/login', loginLimiter, async (req, res, next) => {
     try {
-        fetchedUser = await User.findOne({ email: req.body.email })
-        const hashMatch = bcrypt.compare(req.body.password, fetchedUser.password)
-        if (hashMatch) {
-            const token = jwt.sign(
-                { email: fetchedUser.email, userId: fetchedUser._id },
-                'This is a secret phrase and should be much longer and more secure',
-                { expiresIn: 3600 }
-            );
-            return res.status(200).json({
-                token: token,
-                expiresIn: 3600,
-            });
-        } else {
-            return res.status(401).json({
-                message: 'Auth failed'
-            });
+        const fetchedUser = await User.findOne({ email: req.body.email });
+        if (!fetchedUser) {
+            return res.status(401).json({ message: 'Auth failed: User not found' });
         }
+
+        const hashMatch = await bcrypt.compare(req.body.password, fetchedUser.password);
+        if (!hashMatch) {
+            return res.status(401).json({ message: 'Auth failed: Incorrect password' });
+        }
+
+        const token = generateToken(fetchedUser);
+
+        res.status(200).json({
+            token: token,
+            expiresIn: 3600,
+        });
     } catch (error) {
-        console.error('Error during login:', error);
-        return res.status(401).json({
-            message: 'Auth failed'
+        console.log('Failed to login')
+        res.status(401).json({
+            message: error?.message || 'Auth failed'
         });
     }
 });
