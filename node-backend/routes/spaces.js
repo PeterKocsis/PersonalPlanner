@@ -102,8 +102,12 @@ router.get('', checkAuth, async (req, res, next) => {
     session.startTransaction();
 
     try {
-        userSpaces =  await Space.find({ ownerID: req.userData.userId })
-        userSpacePriority = await SpacePriority.findOne({ ownerID: req.userData.userId })
+        userSpaces =  await Space.find({ ownerID: req.userData.userId }).session(session)
+        userSpacePriority = await SpacePriority.findOne({ ownerID: req.userData.userId }).session(session)
+
+        if (!userSpaces || !userSpacePriority) {
+            throw new Error('Unable to get spaces or space priority for the user');
+        }
 
         const sortedSpaces = [];
         userSpacePriority.spaceList.forEach((spaceId) => {
