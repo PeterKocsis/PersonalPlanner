@@ -9,6 +9,6 @@
 
 <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
     @for (space of spaces(); track space; let i = $index) {
-      <div class="example-box" cdkDrag>{{ (i + 1) + ". " + space.displayName}}</div>
+      <app-space-item [spaceItem]="space" class="example-box" cdkDrag></app-space-item>
     }
 </div>

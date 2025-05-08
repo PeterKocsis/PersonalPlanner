@@ -1,0 +1,16 @@
+<mat-card style="width: 100%;">
+    <mat-card-content style="padding: 0px 16px;">
+        <div style="display: flex; align-items: center;">
+            <h3 style="margin: 0">{{ spaceItem().displayName }}</h3>
+            <span style="flex: 1 1 auto;"></span>
+            <button mat-icon-button>
+                <mat-icon color="primary">edit</mat-icon>
+            </button>
+            <button mat-icon-button (click)="onDelete()">
+                <mat-icon color="warn">delete</mat-icon>
+            </button>
+
+        </div>
+    </mat-card-content>
+</mat-card>
+

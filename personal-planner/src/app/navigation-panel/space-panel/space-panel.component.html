@@ -3,14 +3,14 @@
     @for (space of spaces(); track space._id) {
         <mat-list-item [routerLink]="['/spaces', space._id]" routerLinkActive="selected">
             <a matListItemTitle >{{space.displayName}}</a>
-            <span matListItemMeta>
+            <!-- <span matListItemMeta>
                 <button mat-icon-button>
                     <mat-icon color="primary">edit</mat-icon>
                 </button>
                 <button mat-icon-button (click)="onDeleteSpace(space._id)">
                     <mat-icon >delete</mat-icon>
                 </button>
-            </span>
+            </span> -->
         </mat-list-item>
     }
 </mat-nav-list>

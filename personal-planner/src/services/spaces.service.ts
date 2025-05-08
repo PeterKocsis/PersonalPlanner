@@ -11,7 +11,7 @@ export class SpacesService {
   public inboxSpace = signal<ISpace | undefined>(undefined);
   constructor(private http: HttpClient, private authService: AuthService) {
     effect(async () => {
-      if (this.authService.isLoggedInSignal()) {
+      if (this.authService.userAuthenticated()) {
         this.spaces.set(await this.getSpaces());
         this.inboxSpace.set(await this.getInbox());
       }
@@ -20,19 +20,23 @@ export class SpacesService {
 
   getInbox(): Promise<ISpace> {
     return new Promise<ISpace>((resolve, reject) => {
-      this.http.get<{ message: string, inboxSpace: ISpace }>('http://localhost:3000/api/spaces/inbox').subscribe({
-        next: (response)=> {
-          resolve(response.inboxSpace);
-        },
-        error: (error)=> {
-          reject(error)
-        }
-      });
+      this.http
+        .get<{ message: string; inboxSpace: ISpace }>(
+          'http://localhost:3000/api/spaces/inbox'
+        )
+        .subscribe({
+          next: (response) => {
+            resolve(response.inboxSpace);
+          },
+          error: (error) => {
+            reject(error);
+          },
+        });
     });
   }
 
   private getSpaces(): Promise<ISpace[]> {
-    return new Promise<ISpace[]>((resolve, reject)=> {
+    return new Promise<ISpace[]>((resolve, reject) => {
       this.http
         .get<{ spaces: ISpace[] }>('http://localhost:3000/api/spaces')
         .subscribe({
@@ -44,8 +48,7 @@ export class SpacesService {
             console.error(`Failed to fetch spaces with prio: ${error}`);
             reject(error);
           },
-        })
-
+        });
     });
   }
 
@@ -57,7 +60,7 @@ export class SpacesService {
       )
       .subscribe({
         next: (data) => {
-          this.spaces.update((old)=>[...old, data.newSpace]);
+          this.spaces.update((old) => [...old, data.newSpace]);
         },
         error: (error) => {
           console.error('Error creating space:', error);
@@ -68,7 +71,9 @@ export class SpacesService {
   deleteSpace(id: string) {
     this.http.delete(`http://localhost:3000/api/spaces/${id}`).subscribe({
       next: (data) => {
-        this.spaces.update((previous)=> previous.filter((space)=> space._id !== id));
+        this.spaces.update((previous) =>
+          previous.filter((space) => space._id !== id)
+        );
       },
       error: (error) => {
         console.error('Error deleting space:', error);

@@ -14,14 +14,14 @@ import { CommonModule } from '@angular/common';
     MatButtonModule,
     RouterLink,
     RouterLinkActive,
-    CommonModule
+    CommonModule,
   ],
   templateUrl: './header.component.html',
   styleUrl: './header.component.scss',
 })
 export class HeaderComponent {
   private authService = inject(AuthService);
-  userIsAuthenticated = this.authService.isLoggedInSignal;
+  userIsAuthenticated = this.authService.userAuthenticated;
 
   onLogout() {
     this.authService.logout();

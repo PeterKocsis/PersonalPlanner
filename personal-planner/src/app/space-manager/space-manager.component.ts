@@ -10,6 +10,7 @@ import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
 import { ISpace } from '../interfaces/space.interface';
 import { MatButton } from '@angular/material/button';
+import { SpaceItemComponent } from './space-item/space-item.component';
 
 @Component({
   selector: 'app-space-manager',
@@ -19,6 +20,7 @@ import { MatButton } from '@angular/material/button';
     MatInput,
     FormsModule,
     MatButton,
+    SpaceItemComponent
   ],
   templateUrl: './space-manager.component.html',
   styleUrl: './space-manager.component.scss',

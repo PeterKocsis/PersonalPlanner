@@ -6,10 +6,9 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../app/auth/auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TaskService {
-
   tasks$ = new BehaviorSubject<ITask[]>([]);
   tasks = toSignal(this.tasks$, { initialValue: [] });
 
@@ -42,11 +41,10 @@ export class TaskService {
         },
       });
   }
-    
 
   constructor(private http: HttpClient, private authService: AuthService) {
     effect(() => {
-      if (this.authService.isLoggedInSignal()) {
+      if (this.authService.userAuthenticated()) {
         this.getAllTask();
       }
     });

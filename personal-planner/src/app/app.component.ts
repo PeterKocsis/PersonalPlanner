@@ -22,22 +22,22 @@ export class AppComponent implements OnInit {
   title = 'personal-planner';
 
   private authService = inject(AuthService);
-  isLoggedIn = this.authService.isLoggedInSignal();
-  @ViewChild('drawer', { static: true}) navigationPanel!: MatDrawer;
+  isLoggedIn = this.authService.userAuthenticated();
+  @ViewChild('drawer', { static: true }) navigationPanel!: MatDrawer;
 
   constructor() {
     effect(() => {
-      if(this.authService.isLoggedInSignal()) {
-        this.navigationPanel.open();
-      }
-      else {
+      if (this.authService.userAuthenticated()) {
+        if (!this.navigationPanel.opened) {
+          this.navigationPanel.open();
+        }
+      } else {
         this.navigationPanel.close();
       }
     });
   }
-  
+
   ngOnInit(): void {
     this.authService.autoLogin();
   }
-
 }
