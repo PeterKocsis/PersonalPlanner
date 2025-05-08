@@ -102,7 +102,7 @@ router.get('', checkAuth, async (req, res, next) => {
     session.startTransaction();
 
     try {
-        userSpaces =  await Space.find({ ownerID: req.userData.userId }).session(session)
+        userSpaces =  await Space.find({ ownerID: req.userData.userId, excludedFromPrioList: false }).session(session)
         userSpacePriority = await SpacePriority.findOne({ ownerID: req.userData.userId }).session(session)
 
         if (!userSpaces || !userSpacePriority) {
@@ -133,6 +133,35 @@ router.get('', checkAuth, async (req, res, next) => {
         });
     } finally {
         session.endSession();
+    }
+});
+
+router.get('/inbox', checkAuth, async (req, res, next) => {
+    console.log('Fetching inbox space for user:', req.userData.userId);
+
+    try {
+        const inboxSpace = await Space.findOne({
+            ownerID: req.userData.userId,
+            excludedFromPrioList: true
+        });
+
+        if (!inboxSpace) {
+            return res.status(404).json({
+                message: 'Inbox space not found'
+            });
+        }
+
+        console.log('Inbox space:', inboxSpace);
+        res.status(200).json({
+            message: 'Inbox space fetched successfully!',
+            inboxSpace: inboxSpace
+        });
+    } catch (error) {
+        console.error('Error fetching inbox space:', error);
+        res.status(500).json({
+            message: 'Error fetching inbox space',
+            error: error.message
+        });
     }
 });
 

@@ -51,7 +51,7 @@ export class AuthService {
           }
           , error: (error) => {
             console.error("Error logging in user", error);
-            resolve(false);  
+            reject(error.error.message);  
           }
         }); 
     });
@@ -70,15 +70,7 @@ export class AuthService {
       email: email,
       password: password
     }
-    this.http.post("http://localhost:3000/api/user/signup", authData)
-      .subscribe({
-        next: (response) => {
-          console.log("User created successfully", response);
-        }
-        , error: (error) => {
-          console.error("Error creating user", error);
-        }
-      });
+    return this.http.post("http://localhost:3000/api/user/signup", authData);
   }
 
   autoLogin() {

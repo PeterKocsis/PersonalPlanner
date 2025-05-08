@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule, NgForm } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -8,6 +8,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { AuthService } from '../auth.service';
 import { Router } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +28,7 @@ import { Router } from '@angular/router';
 export class LoginComponent {
   private authService = inject(AuthService);
   loginSuccsess: boolean | undefined = undefined;
+  formServerSideError = signal<string | undefined>(undefined)
 
   async onLogin(form: NgForm) {
     if (form.invalid) {
@@ -34,9 +36,13 @@ export class LoginComponent {
     }
     const email = form.value.email;
     const password = form.value.password;
-    this.loginSuccsess = await this.authService.login(email, password);
-    if (this.loginSuccsess) {
-      form.reset();
+    try {
+      this.loginSuccsess = await this.authService.login(email, password);
+      if (this.loginSuccsess) {
+        form.reset();
+      }
+    } catch (error) {
+      this.formServerSideError.set(error as string)
     }
   }
 }

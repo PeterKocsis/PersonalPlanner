@@ -43,7 +43,14 @@ router.post('/signup', [
         const user = new User({ email: req.body.email, password: hash });
         const savedUser = await user.save({ session });
 
+        const inboxSpace = new Space({displayName: 'Inbox', ownerID: savedUser._id, readOnly: true, excludedFromPrioList: true });
+        const othersSpace = new Space({ displayName: 'Others', ownerID: savedUser._id, readOnly: true});
+
         const spacePrio = new SpacePriority({ spaceList: [], ownerID: savedUser._id });
+        spacePrio.spaceList.push(othersSpace._id);
+        
+        await inboxSpace.save({session});
+        await othersSpace.save({session});
         await spacePrio.save({ session });
 
         await session.commitTransaction();
@@ -57,9 +64,9 @@ router.post('/signup', [
         await session.abortTransaction();
         session.endSession();
 
-        console.log('Failed to create user');
+        console.log(`Failed to create user: ${err}`);
         res.status(500).json({
-            message: err?.message || 'Internal server error',
+            message: err?.message,
         })
     }
 });
@@ -73,7 +80,7 @@ router.post('/login', loginLimiter, async (req, res, next) => {
 
         const hashMatch = await bcrypt.compare(req.body.password, fetchedUser.password);
         if (!hashMatch) {
-            return res.status(401).json({ message: 'Auth failed: Incorrect password' });
+            return res.status(401).json( { message: 'Auth failed: Incorrect password' });
         }
 
         const token = generateToken(fetchedUser);
@@ -83,7 +90,7 @@ router.post('/login', loginLimiter, async (req, res, next) => {
             expiresIn: 3600,
         });
     } catch (error) {
-        console.log('Failed to login')
+        console.error(error)
         res.status(401).json({
             message: error?.message || 'Auth failed'
         });
