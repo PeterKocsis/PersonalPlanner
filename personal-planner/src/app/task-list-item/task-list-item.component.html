@@ -1,0 +1,28 @@
+<div [style.background-color]="itemHovered ? '#ccc' : 'white'" class="task-format" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+    <mat-checkbox class="task-data"></mat-checkbox>
+    <h3 class="task-data">{{task().title}}</h3>
+    <p class="task-data">{{task().description}}</p>
+    <div style="display: flex; flex-direction: row;" [style.visibility]="itemHovered ? 'visible' : 'hidden'">
+        <button mat-icon-button (click)="onEdit()">
+            <mat-icon>edit</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onSetCompletionTime()">
+            <mat-icon>timer</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onAssignToSpace()">
+            <mat-icon>playlist_add</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onAssignToWeek()">
+            <mat-icon>calendar_today</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onAssignToWeek()">
+            <mat-icon>date_range</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onDelete()">
+            <mat-icon>delete</mat-icon>
+        </button>
+        <button mat-icon-button (click)="onComplete()">
+            <mat-icon>task_alt</mat-icon>
+        </button>
+    </div>
+</div>

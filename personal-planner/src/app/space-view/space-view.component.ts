@@ -7,6 +7,7 @@ import { MatInput } from '@angular/material/input';
 import { SpacesService } from '../../services/spaces.service';
 import { TaskService } from '../../services/task.service';
 import { ITask } from '../interfaces/task.interface';
+import { TaskListItemComponent } from '../task-list-item/task-list-item.component';
 
 @Component({
   selector: 'app-space-view',
@@ -16,6 +17,7 @@ import { ITask } from '../interfaces/task.interface';
     MatInput,
     FormsModule,
     MatButton,
+    TaskListItemComponent
   ],
   templateUrl: './space-view.component.html',
   styleUrl: './space-view.component.scss',
@@ -43,4 +45,5 @@ export class SpaceViewComponent {
   }
 
   onDrop(event: any) {}
+
 }

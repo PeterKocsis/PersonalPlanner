@@ -1,0 +1,9 @@
+.task-format {
+    display: grid;
+    grid-template-columns: 50px 1fr 2fr 1fr;
+}
+
+.task-data {
+    align-self: center;
+    margin: 0px;
+}

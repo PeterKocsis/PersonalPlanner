@@ -1,14 +1,21 @@
-<form>
-    <mat-form-field appearance="fill">
-        <mat-label>Space Name</mat-label>
-        <input matInput [(ngModel)]="newSpaceName" name="spaceName" required>
-    </mat-form-field>
-
-    <button mat-raised-button color="primary" (click)="addSpace()">Add Space</button>
-</form>
-
-<div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
-    @for (space of spaces(); track space; let i = $index) {
-      <app-space-item [spaceItem]="space" class="example-box" cdkDrag></app-space-item>
-    }
+<div style="display: flex; justify-content: space-between; width: 100%;">
+    <div style="flex: 1; text-align: center; border: 1px solid #ccc; margin: 0 5px;">
+        <form name="Create Space">
+            <mat-form-field appearance="fill">
+                <mat-label>Space Name</mat-label>
+                <input matInput [(ngModel)]="newSpaceName" name="spaceName" required>
+            </mat-form-field>
+        
+            <button mat-raised-button color="primary" (click)="addSpace()">Add Space</button>
+        </form>
+        
+        <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+            @for (space of spaces(); track space; let i = $index) {
+              <app-space-item [spaceItem]="space" class="example-box" cdkDrag></app-space-item>
+            }
+        </div>
+    </div>
+    <div style="flex: 1; text-align: center; border: 1px solid #ccc; margin: 0 5px;">Column 2</div>
+    <div style="flex: 1; text-align: center; border: 1px solid #ccc; margin: 0 5px;">Column 3</div>
 </div>
+
