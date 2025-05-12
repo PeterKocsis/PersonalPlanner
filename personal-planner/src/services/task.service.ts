@@ -1,7 +1,7 @@
 import { effect, inject, Injectable, signal } from '@angular/core';
 import { ITask } from '../app/interfaces/task.interface';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, take } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../app/auth/auth.service';
 
@@ -26,8 +26,35 @@ export class TaskService {
       });
   }
 
+  assignToSpace(taskId: string, spaceId: string) {
+    this.http
+      .put<ITask>(
+        `http://localhost:3000/api/tasks/${taskId}/space`,
+        { spaceId: spaceId },
+      )
+      .subscribe({
+        next: (result) => {
+          this.tasks$.next(
+            this.tasks$.value.map((task) => {
+              let mappedTask = { ...task };
+              if (mappedTask._id === taskId) {
+                mappedTask = { ...mappedTask, spaceId: spaceId };
+              }
+              return mappedTask;
+            })
+          );
+        },
+        error: (error) => {
+          console.error(
+            `Failed to assign spaceId (${spaceId}) to task (${taskId})`,
+            error
+          );
+        },
+      });
+  }
+
   addTask(task: ITask): Promise<void> {
-    return new Promise<void>((resolve, reject)=>{
+    return new Promise<void>((resolve, reject) => {
       this.http
         .post<{ message: string; task: ITask }>(
           `http://localhost:3000/api/tasks`,
@@ -42,29 +69,28 @@ export class TaskService {
             console.error('Error creating task:', error);
             reject(error);
           },
-          complete: ()=> {
+          complete: () => {
             reject('There was no response on add task request');
-          }
-          
+          },
         });
-
     });
   }
 
   deleteTask(_id: string): Promise<void> {
     console.log(`Request to delete task with id: ${_id}`);
-    return new Promise<void>((resolve, reject)=>{
+    return new Promise<void>((resolve, reject) => {
       this.http.delete(`http://localhost:3000/api/tasks/${_id}`).subscribe({
-        next: ()=> {
+        next: () => {
           console.log(`Task successfuly deleted with id: ${_id}`);
-          this.tasks$.next(this.tasks$.value.filter(task=>task._id !==_id));
-          resolve()
+          this.tasks$.next(
+            this.tasks$.value.filter((task) => task._id !== _id)
+          );
+          resolve();
         },
-        error: (error)=> {
+        error: (error) => {
           console.error('Error deleting task:', error);
-        }
+        },
       });
-
     });
   }
   completeTask(_id: string) {

@@ -7,13 +7,8 @@
     <button mat-raised-button color="primary" (click)="onAddTask()">Add Task</button>
 </form>
 
-<!-- <div cdkDropList class="example-list" (cdkDropListDropped)="onDrop($event)">
-    @for (task of tasks(); track task._id; let i = $index) {
-      <div class="example-box" cdkDrag>{{ task.title}}</div>
-    }
-</div> -->
 <div class="example-list">
-    @for (task of taskService.tasks(); track task._id) {
+    @for (task of tasks(); track task._id) {
         <app-task-list-item [task]="task"></app-task-list-item>
     }
 

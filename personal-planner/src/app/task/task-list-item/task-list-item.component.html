@@ -1,17 +1,24 @@
-<div [style.background-color]="itemHovered ? '#ccc' : 'white'" class="task-format" (mouseenter)="onMouseEnter()" (mouseleave)="onMouseLeave()">
+<div [style.background-color]="itemHovered ? '#ccc' : 'white'" class="task-format" (mouseenter)="onMouseEnter()"
+    (mouseleave)="onMouseLeave()">
     <mat-checkbox class="task-data"></mat-checkbox>
     <h3 class="task-data">{{task().title}}</h3>
     <p class="task-data">{{task().description}}</p>
-    <div style="display: flex; flex-direction: row;" [style.visibility]="itemHovered ? 'visible' : 'hidden'">
+    <div style="display: flex; flex-direction: row; align-items: center;" [style.visibility]="itemHovered ? 'visible' : 'hidden'">
         <button mat-icon-button (click)="onEdit()">
             <mat-icon>edit</mat-icon>
         </button>
         <button mat-icon-button (click)="onSetCompletionTime()">
             <mat-icon>timer</mat-icon>
         </button>
-        <button mat-icon-button (click)="onAssignToSpace()">
-            <mat-icon>playlist_add</mat-icon>
-        </button>
+        <mat-form-field>
+            <mat-label>Selected Space</mat-label>
+            <mat-select [(value)]="selectedSpace">
+                @for (space of spaces(); track space?._id) {
+                <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+
         <button mat-icon-button (click)="onAssignToWeek()">
             <mat-icon>calendar_today</mat-icon>
         </button>

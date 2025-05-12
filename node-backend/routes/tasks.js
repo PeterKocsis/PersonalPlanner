@@ -58,4 +58,22 @@ router.delete('/:id', checkAuth, (req, res, next) => {
 }
 );
 
+router.put('/:id/space', checkAuth, async (req, res, next)=> {
+    console.log(req);
+    const spaceId = req.body.spaceId;
+    console.log(`Update task with this: ${spaceId}`);
+    try {
+        const updatedTask = await Task.findOne({_id: req.params.id}).updateOne({ spaceId: spaceId});
+        console.log('Task updated');
+        res.status(200).json(
+            updatedTask
+        );
+    } catch (error) {
+        console.log('Error during task update', error);
+            res.status(500).json({
+                message: 'Error during task update'
+            })
+    }
+});
+
 module.exports = router;
