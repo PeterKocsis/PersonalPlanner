@@ -20,6 +20,7 @@ import { SpacesService } from '../../../services/spaces.service';
 import { ISpace } from '../../interfaces/space.interface';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
+import { TextFieldModule } from '@angular/cdk/text-field';
 
 @Component({
   selector: 'app-task-editor-dialog',
@@ -29,6 +30,7 @@ import { MatSelectModule } from '@angular/material/select';
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
+    TextFieldModule
   ],
   templateUrl: './task-editor-dialog.component.html',
   styleUrl: './task-editor-dialog.component.scss',

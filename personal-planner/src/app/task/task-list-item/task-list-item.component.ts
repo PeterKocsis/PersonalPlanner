@@ -19,7 +19,7 @@ import { TaskEditorDialogComponent } from '../task-editor-dialog/task-editor-dia
     MatIconModule,
     MatFormFieldModule,
     MatSelectModule,
-    MatDialogModule
+    MatDialogModule,
   ],
   templateUrl: './task-list-item.component.html',
   styleUrl: './task-list-item.component.scss',
@@ -53,7 +53,10 @@ export class TaskListItemComponent {
   }
 
   onEdit() {
-    this.dialog.open(TaskEditorDialogComponent, {data: this.task()});
+    this.dialog.open(TaskEditorDialogComponent, {
+      data: this.task(),
+      width: '400px',
+    });
   }
 
   onComplete() {
