@@ -1,0 +1,23 @@
+<h2 mat-dialog-title>Edit Task</h2>
+<mat-dialog-content style="display: flex; flex-direction: column;">
+    <mat-form-field>
+        <mat-label>Title</mat-label>
+        <input matInput [(ngModel)]="task().title" />
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Description</mat-label>
+        <input matInput [(ngModel)]="task().description" />
+    </mat-form-field>
+    <mat-form-field>
+        <mat-label>Assigned Space</mat-label>
+        <mat-select [(value)]="selectedSpace">
+            @for (space of spaces(); track space?._id) {
+            <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
+            }
+        </mat-select>
+    </mat-form-field>
+</mat-dialog-content>
+<mat-dialog-actions align="end">
+    <button mat-raised-button (click)="onCancel()">Cancel</button>
+    <button mat-raised-button color="primary" (click)="onAccept()" cdkFocusInitial>Ok</button>
+</mat-dialog-actions>

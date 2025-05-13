@@ -9,8 +9,31 @@ import { AuthService } from '../app/auth/auth.service';
   providedIn: 'root',
 })
 export class TaskService {
+
   tasks$ = new BehaviorSubject<ITask[]>([]);
   tasks = toSignal(this.tasks$, { initialValue: [] });
+
+  updateTask(task: ITask): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.http
+        .put<ITask>(
+          `http://localhost:3000/api/tasks/${task._id}`,
+          task
+        )
+        .subscribe({
+          next: (data) => {
+            this.tasks$.next(
+              this.tasks$.value.map((t) => (t._id === task._id ? task : t))
+            );
+            resolve();
+          },
+          error: (error) => {
+            console.error('Error updating task:', error);
+            reject(error);
+          },
+        });
+    });
+  }
 
   getAllTask(): void {
     this.http

@@ -8,6 +8,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { SpacesService } from '../../../services/spaces.service';
 import { ISpace } from '../../interfaces/space.interface';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { TaskEditorDialogComponent } from '../task-editor-dialog/task-editor-dialog.component';
 
 @Component({
   selector: 'app-task-list-item',
@@ -17,6 +19,7 @@ import { ISpace } from '../../interfaces/space.interface';
     MatIconModule,
     MatFormFieldModule,
     MatSelectModule,
+    MatDialogModule
   ],
   templateUrl: './task-list-item.component.html',
   styleUrl: './task-list-item.component.scss',
@@ -25,26 +28,12 @@ export class TaskListItemComponent {
   task = input.required<ITask>();
   taskService = inject(TaskService);
   spaceServie = inject(SpacesService);
+  dialog = inject(MatDialog);
   itemHovered = false;
   spaces = computed(() => [
     this.spaceServie.inboxSpace(),
     ...this.spaceServie.spaces(),
   ]);
-  private _selectedSpace: Signal<ISpace | undefined>;
-
-  get selectedSpace() {
-    return this._selectedSpace()?._id;
-  }
-
-  set selectedSpace(value: string | undefined) {
-    this.onAssignToSpace(value!);
-  }
-
-  constructor() {
-    this._selectedSpace = computed(() =>
-      this.spaces().find((item) => item?._id === this.task().spaceId)
-    );
-  }
 
   onMouseEnter() {
     this.itemHovered = true;
@@ -55,9 +44,6 @@ export class TaskListItemComponent {
   onSetCompletionTime() {
     throw new Error('Method not implemented.');
   }
-  onAssignToSpace(spaceId: string) {
-    this.taskService.assignToSpace(this.task()._id, spaceId);
-  }
   onAssignToWeek() {
     throw new Error('Method not implemented.');
   }
@@ -67,7 +53,7 @@ export class TaskListItemComponent {
   }
 
   onEdit() {
-    console.log(`Start edit on: ${this.task().title}`);
+    this.dialog.open(TaskEditorDialogComponent, {data: this.task()});
   }
 
   onComplete() {

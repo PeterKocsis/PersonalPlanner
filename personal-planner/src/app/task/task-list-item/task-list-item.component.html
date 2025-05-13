@@ -5,31 +5,16 @@
     <p class="task-data">{{task().description}}</p>
     <div style="display: flex; flex-direction: row; align-items: center;" [style.visibility]="itemHovered ? 'visible' : 'hidden'">
         <button mat-icon-button (click)="onEdit()">
-            <mat-icon>edit</mat-icon>
+            <mat-icon class="material-icons-outlined">edit</mat-icon>
         </button>
         <button mat-icon-button (click)="onSetCompletionTime()">
-            <mat-icon>timer</mat-icon>
-        </button>
-        <mat-form-field>
-            <mat-label>Selected Space</mat-label>
-            <mat-select [(value)]="selectedSpace">
-                @for (space of spaces(); track space?._id) {
-                <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
-                }
-            </mat-select>
-        </mat-form-field>
-
-        <button mat-icon-button (click)="onAssignToWeek()">
-            <mat-icon>calendar_today</mat-icon>
-        </button>
-        <button mat-icon-button (click)="onAssignToWeek()">
-            <mat-icon>date_range</mat-icon>
+            <mat-icon class="material-icons-outlined">timer</mat-icon>
         </button>
         <button mat-icon-button (click)="onDelete()">
-            <mat-icon>delete</mat-icon>
+            <mat-icon class="material-icons-outlined">delete</mat-icon>
         </button>
         <button mat-icon-button (click)="onComplete()">
-            <mat-icon>task_alt</mat-icon>
+            <mat-icon class="material-icons-outlined">task_alt</mat-icon>
         </button>
     </div>
 </div>
