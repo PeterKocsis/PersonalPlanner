@@ -21,6 +21,7 @@ import { ISpace } from '../../interfaces/space.interface';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
 import { TextFieldModule } from '@angular/cdk/text-field';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 
 @Component({
   selector: 'app-task-editor-dialog',
@@ -30,7 +31,8 @@ import { TextFieldModule } from '@angular/cdk/text-field';
     MatInputModule,
     MatSelectModule,
     MatButtonModule,
-    TextFieldModule
+    TextFieldModule,
+    MatButtonToggleModule
   ],
   templateUrl: './task-editor-dialog.component.html',
   styleUrl: './task-editor-dialog.component.scss',
@@ -57,6 +59,16 @@ export class TaskEditorDialogComponent {
 
   onCancel() {
     this.dialogRef.close();
+  }
+
+
+  get timeToFinish(): string | undefined {
+    return computed(()=>this.task().timeToCompleteMinutes)()?.toString();
+  }
+
+  set timeToFinish(value: string | undefined) {
+    const timeToFinish = value ? parseInt(value) : undefined;
+    this.task.update((previous)=>{return {...previous, timeToCompleteMinutes: timeToFinish}});
   }
 
   async onAccept() {

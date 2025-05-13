@@ -55,7 +55,7 @@ export class TaskListItemComponent {
   onEdit() {
     this.dialog.open(TaskEditorDialogComponent, {
       data: this.task(),
-      width: '400px',
+      width: '500px',
     });
   }
 

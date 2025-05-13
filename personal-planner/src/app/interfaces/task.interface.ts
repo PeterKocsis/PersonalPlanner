@@ -4,4 +4,5 @@ export interface ITask {
   description?: string;
   createdAt?: Date;
   spaceId: string;
+  timeToCompleteMinutes?: number;
 }

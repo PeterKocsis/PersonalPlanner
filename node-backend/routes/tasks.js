@@ -65,7 +65,7 @@ router.put('/:id', checkAuth, async (req, res, next)=> {
     try {
         const updatedTask = await Task
             .findOne({_id: req.params.id})
-            .updateOne({ spaceId: task.spaceId, title: task.title, description: task.description});
+            .updateOne({ spaceId: task.spaceId, title: task.title, description: task.description, timeToCompleteMinutes: task.timeToCompleteMinutes });
         console.log(`Task updated ${updatedTask}`);
         console.log(updatedTask)
         res.status(200).json(

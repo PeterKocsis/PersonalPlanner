@@ -18,6 +18,28 @@
             }
         </mat-select>
     </mat-form-field>
+    <mat-form-field>
+        <mat-label>Assigned Space</mat-label>
+        <mat-select [(value)]="selectedSpace">
+            @for (space of spaces(); track space?._id) {
+            <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
+            }
+        </mat-select>
+    </mat-form-field>
+    <mat-label>Estimated complation time</mat-label>
+    <mat-button-toggle-group name="estimatedDuration" [(ngModel)]="timeToFinish"
+        aria-label="Estimated Duration">
+        <mat-button-toggle value="5">5m</mat-button-toggle>
+        <mat-button-toggle value=15>15m</mat-button-toggle>
+        <mat-button-toggle value=30>30m</mat-button-toggle>
+        <mat-button-toggle value=60>1h</mat-button-toggle>
+        <mat-button-toggle value=120>2h</mat-button-toggle>
+        <mat-button-toggle value=240>4h</mat-button-toggle>
+        <mat-button-toggle value=480>8h</mat-button-toggle>
+        <mat-button-toggle value=960>8h+</mat-button-toggle>
+    </mat-button-toggle-group>
+    <!-- <mat-form-field>
+    </mat-form-field> -->
 </mat-dialog-content>
 <mat-dialog-actions align="end">
     <button mat-raised-button (click)="onCancel()">Cancel</button>
