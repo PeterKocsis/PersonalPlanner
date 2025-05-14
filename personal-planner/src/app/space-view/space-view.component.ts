@@ -48,6 +48,7 @@ export class SpaceViewComponent {
         _id: '',
         title: this.newTaskTitle,
         spaceId: this.spaceId()!,
+        completed: false,
       };
       this.taskService.addTask(newTask);
       this.newTaskTitle = '';

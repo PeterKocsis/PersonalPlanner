@@ -3,7 +3,8 @@
     <mat-checkbox class="task-data"></mat-checkbox>
     <h3 class="task-data">{{task().title}}</h3>
     <p class="task-data">{{task().description}}</p>
-    <div style="display: flex; margin-left: auto; flex-direction: row; align-items: center;" [style.visibility]="itemHovered ? 'visible' : 'hidden'">
+    <div style="display: flex; margin-left: auto; flex-direction: row; align-items: center;"
+        [style.visibility]="itemHovered ? 'visible' : 'hidden'">
         <button mat-icon-button (click)="onEdit()">
             <mat-icon class="material-icons-outlined">edit</mat-icon>
         </button>
@@ -13,8 +14,12 @@
         <button mat-icon-button (click)="onDelete()">
             <mat-icon class="material-icons-outlined">delete</mat-icon>
         </button>
-        <button mat-icon-button (click)="onComplete()">
-            <mat-icon class="material-icons-outlined">task_alt</mat-icon>
+        <button mat-icon-button (click)="onToggleComplete()">
+            @if (task().completed) {
+                <mat-icon color="primary" class="material-icons-outlined">check_circle</mat-icon>
+            } @else {
+                <mat-icon class="material-icons-outlined">radio_button_unchecked</mat-icon>
+            }
         </button>
     </div>
 </div>

@@ -9,17 +9,13 @@ import { AuthService } from '../app/auth/auth.service';
   providedIn: 'root',
 })
 export class TaskService {
-
   tasks$ = new BehaviorSubject<ITask[]>([]);
   tasks = toSignal(this.tasks$, { initialValue: [] });
 
   updateTask(task: ITask): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.http
-        .put<ITask>(
-          `http://localhost:3000/api/tasks/${task._id}`,
-          task
-        )
+        .put<ITask>(`http://localhost:3000/api/tasks/${task._id}`, task)
         .subscribe({
           next: (data) => {
             this.tasks$.next(
@@ -51,10 +47,9 @@ export class TaskService {
 
   assignToSpace(taskId: string, spaceId: string) {
     this.http
-      .put<ITask>(
-        `http://localhost:3000/api/tasks/${taskId}/space`,
-        { spaceId: spaceId },
-      )
+      .put<ITask>(`http://localhost:3000/api/tasks/${taskId}/space`, {
+        spaceId: spaceId,
+      })
       .subscribe({
         next: (result) => {
           this.tasks$.next(
@@ -116,8 +111,26 @@ export class TaskService {
       });
     });
   }
-  completeTask(_id: string) {
-    throw new Error('Method not implemented.');
+  setTaskState(_id: string, newState: boolean): Promise<void> {
+    return new Promise<void>((resolve, reject) => {
+      this.http
+        .put<ITask>(
+          `http://localhost:3000/api/tasks/${_id}/state`,
+          { state: newState }
+        )
+        .subscribe({
+          next: (responseTask) => {
+            this.tasks$.next(
+              this.tasks$.value.map((task) => task._id === _id ? responseTask : task)
+            );
+            resolve();
+          },
+          error: (error) => {
+            console.error('Error updating task state:', error);
+            reject(error);
+          },
+        });
+    });
   }
 
   constructor(private http: HttpClient, private authService: AuthService) {

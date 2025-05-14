@@ -97,4 +97,23 @@ router.put('/:id/space', checkAuth, async (req, res, next)=> {
     }
 });
 
+router.put('/:id/state', checkAuth, async (req, res, next)=> {
+    console.log(req);
+    const newTaskState = req.body.state;
+    console.log(`Update task with this: ${newTaskState}`);
+    try {
+        await Task.findOne({_id: req.params.id}).updateOne({ completed: newTaskState});
+        console.log('Task updated');
+        const updatedTask = await Task.findOne({_id: req.params.id});
+        res.status(200).json(
+            updatedTask
+        );
+    } catch (error) {
+        console.log('Error during completion state change', error);
+            res.status(500).json({
+                message: 'Error during completion state change'
+            })
+    }
+});
+
 module.exports = router;

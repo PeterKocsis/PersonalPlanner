@@ -5,6 +5,7 @@ const taskShema = mongoose.Schema({
     description: { type: String, default: '' },
     createdAt: { type: Date, default: Date.now },
     spaceId: { type: String, required: true },
+    completed: { type: Boolean, default: false },
     timeToCompleteMinutes: { type: Number, default: 0 },
 });
 

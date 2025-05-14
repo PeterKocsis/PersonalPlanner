@@ -59,7 +59,7 @@ export class TaskListItemComponent {
     });
   }
 
-  onComplete() {
-    this.taskService.completeTask(this.task()._id);
+  onToggleComplete() {
+    this.taskService.setTaskState(this.task()._id, !this.task().completed);
   }
 }
