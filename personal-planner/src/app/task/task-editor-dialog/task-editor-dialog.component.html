@@ -18,14 +18,6 @@
             }
         </mat-select>
     </mat-form-field>
-    <mat-form-field>
-        <mat-label>Assigned Space</mat-label>
-        <mat-select [(value)]="selectedSpace">
-            @for (space of spaces(); track space?._id) {
-            <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
-            }
-        </mat-select>
-    </mat-form-field>
     <mat-label>Estimated complation time</mat-label>
     <mat-button-toggle-group name="estimatedDuration" [(ngModel)]="timeToFinish"
         aria-label="Estimated Duration">
