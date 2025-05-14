@@ -6,10 +6,29 @@
 
     <button mat-raised-button color="primary" (click)="onAddTask()">Add Task</button>
 </form>
+<h2>To Do</h2>
+@if (tasksToDo().length > 0) {
+    <div class="example-list">
+        @for (task of tasksToDo(); track task._id) {
+            <app-task-list-item [task]="task"></app-task-list-item>
+        }
+    </div>
+}
+@else {
+    <div class="example-list">
+        <div style="display: flex; flex-direction: column; padding: 10px; border-bottom: 1px solid #ccc;">
+            <h2 style="margin: auto; padding-bottom: 10px;">You are done, great work :{{')'}}</h2>
+            <button style="align-self: center; margin: auto;" mat-raised-button color="primary">Add Task</button>
+        </div>
+    </div>
+}
 
-<div class="example-list">
-    @for (task of tasks(); track task._id) {
-        <app-task-list-item [task]="task"></app-task-list-item>
-    }
-
-</div>
+@if (tasksCompleted().length > 0) {
+    
+    <h2 style="margin-top: 20px;">Finished tasks</h2>
+    <div class="example-list">
+        @for (task of tasksCompleted(); track task._id) {
+            <app-task-list-item [task]="task"></app-task-list-item>
+        }
+    </div>
+}

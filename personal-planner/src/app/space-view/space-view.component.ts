@@ -34,10 +34,22 @@ export class SpaceViewComponent {
   taskService = inject(TaskService);
   spacesService = inject(SpacesService);
   spaceId = input.required<string>();
-  tasks = computed<ITask[]>(() => {
+  tasksToDo = computed<ITask[]>(() => {
     return this.taskService
       .tasks()
-      .filter((task: ITask) => task.spaceId === this.spaceId());
+      .filter(
+        (task: ITask) =>
+          task.spaceId === this.spaceId() && task.completed === false
+      );
+  });
+
+  tasksCompleted = computed<ITask[]>(() => {
+    return this.taskService
+      .tasks()
+      .filter(
+        (task: ITask) =>
+          task.spaceId === this.spaceId() && task.completed === true
+      );
   });
 
   newTaskTitle: string = '';
