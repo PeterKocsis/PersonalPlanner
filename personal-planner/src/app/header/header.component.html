@@ -1,5 +1,7 @@
 <mat-toolbar color="primary">
-  <a mat-button routerLink="/" routerLinkActive="active-link">Personal Planner</a>
+  <a mat-button routerLink="/" routerLinkActive="active-link">
+    <h1>Personal Planner</h1>
+  </a>
   <span class="example-spacer"></span>
   <a *ngIf="!userIsAuthenticated()" mat-button routerLink="/auth/login" routerLinkActive="active-link">Login</a>
   <a *ngIf="!userIsAuthenticated()" mat-button routerLink="/auth/signup" routerLinkActive="active-link">Sign Up</a>
