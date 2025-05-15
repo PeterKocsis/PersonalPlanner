@@ -3,19 +3,19 @@ import {
   Component,
   computed,
   inject,
-  Input,
   input,
-  OnInit,
-  signal,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatButton } from '@angular/material/button';
+import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { SpacesService } from '../../services/spaces.service';
-import { TaskService } from '../../services/task.service';
+import { SpacesService } from '../../adapters/spaces.service';
+import { TaskAdapterService } from '../../adapters/task.adapter.service';
 import { ITask } from '../interfaces/task.interface';
 import { TaskListItemComponent } from '../task/task-list-item/task-list-item.component';
+import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { TaskEditorDialogService } from '../../services/task-editor-dialog.service';
 
 @Component({
   selector: 'app-space-view',
@@ -24,47 +24,42 @@ import { TaskListItemComponent } from '../task/task-list-item/task-list-item.com
     DragDropModule,
     MatInput,
     FormsModule,
-    MatButton,
+    MatButtonModule,
     TaskListItemComponent,
+    MatIconModule,
   ],
   templateUrl: './space-view.component.html',
   styleUrl: './space-view.component.scss',
 })
 export class SpaceViewComponent {
-  taskService = inject(TaskService);
+  taskService = inject(TaskAdapterService);
   spacesService = inject(SpacesService);
+  taskEditorDialogService = inject(TaskEditorDialogService);
   spaceId = input.required<string>();
+  dialog = inject(MatDialog);
   tasksToDo = computed<ITask[]>(() => {
     return this.taskService
-      .tasks()
-      .filter(
-        (task: ITask) =>
-          task.spaceId === this.spaceId() && task.completed === false
-      );
+    .tasks()
+    .filter(
+      (task: ITask) =>
+        task.spaceId === this.spaceId() && task.completed === false
+    );
   });
-
+  
   tasksCompleted = computed<ITask[]>(() => {
     return this.taskService
-      .tasks()
-      .filter(
-        (task: ITask) =>
-          task.spaceId === this.spaceId() && task.completed === true
-      );
+    .tasks()
+    .filter(
+      (task: ITask) =>
+        task.spaceId === this.spaceId() && task.completed === true
+    );
   });
-
+  
   newTaskTitle: string = '';
 
   onAddTask() {
-    if (this.newTaskTitle) {
-      const newTask: ITask = {
-        _id: '',
-        title: this.newTaskTitle,
-        spaceId: this.spaceId()!,
-        completed: false,
-      };
-      this.taskService.addTask(newTask);
-      this.newTaskTitle = '';
-    }
+    this.taskEditorDialogService.addTask(this.newTaskTitle);
+    this.newTaskTitle = '';
   }
 
   onDrop(event: any) {}

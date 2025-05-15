@@ -8,7 +8,7 @@ import { AuthService } from '../app/auth/auth.service';
 @Injectable({
   providedIn: 'root',
 })
-export class TaskService {
+export class TaskAdapterService {
   tasks$ = new BehaviorSubject<ITask[]>([]);
   tasks = toSignal(this.tasks$, { initialValue: [] });
 
@@ -114,14 +114,15 @@ export class TaskService {
   setTaskState(_id: string, newState: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.http
-        .put<ITask>(
-          `http://localhost:3000/api/tasks/${_id}/state`,
-          { state: newState }
-        )
+        .put<ITask>(`http://localhost:3000/api/tasks/${_id}/state`, {
+          state: newState,
+        })
         .subscribe({
           next: (responseTask) => {
             this.tasks$.next(
-              this.tasks$.value.map((task) => task._id === _id ? responseTask : task)
+              this.tasks$.value.map((task) =>
+                task._id === _id ? responseTask : task
+              )
             );
             resolve();
           },

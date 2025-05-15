@@ -1,15 +1,16 @@
-import { Component, computed, inject, input, Signal } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
 import { ITask } from '../../interfaces/task.interface';
-import { TaskService } from '../../../services/task.service';
+import { TaskAdapterService } from '../../../adapters/task.adapter.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { SpacesService } from '../../../services/spaces.service';
-import { ISpace } from '../../interfaces/space.interface';
+import { SpacesService } from '../../../adapters/spaces.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TaskEditorDialogComponent } from '../task-editor-dialog/task-editor-dialog.component';
+import { TaskEditorDialogService } from '../../../services/task-editor-dialog.service';
+
 
 @Component({
   selector: 'app-task-list-item',
@@ -26,8 +27,9 @@ import { TaskEditorDialogComponent } from '../task-editor-dialog/task-editor-dia
 })
 export class TaskListItemComponent {
   task = input.required<ITask>();
-  taskService = inject(TaskService);
+  taskService = inject(TaskAdapterService);
   spaceServie = inject(SpacesService);
+  taskEditorDialogService = inject(TaskEditorDialogService);
   dialog = inject(MatDialog);
   itemHovered = false;
   spaces = computed(() => [
@@ -53,10 +55,7 @@ export class TaskListItemComponent {
   }
 
   onEdit() {
-    this.dialog.open(TaskEditorDialogComponent, {
-      data: this.task(),
-      width: '500px',
-    });
+    this.taskEditorDialogService.editTask(this.task());
   }
 
   onToggleComplete() {

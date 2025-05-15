@@ -25,7 +25,9 @@ router.post('', checkAuth, (req, res, next) => {
     const newTask = new Task({
         title: task.title,
         description: task.description,
-        spaceId: task.spaceId
+        spaceId: task.spaceId,
+        timeToCompleteMinutes: task.timeToCompleteMinutes,
+        completed: task.completed,
     });
     newTask.save()
         .then(() => {

@@ -1,10 +1,11 @@
 import { Component, effect, inject, OnInit, ViewChild } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
+import { ActivatedRoute, RouterOutlet } from '@angular/router';
 import { MatDrawer, MatSidenavModule } from '@angular/material/sidenav';
 import { MatIconModule } from '@angular/material/icon';
 import { HeaderComponent } from './header/header.component';
 import { NavigationPanelComponent } from './navigation-panel/navigation-panel.component';
 import { AuthService } from './auth/auth.service';
+import { TaskEditorDialogService } from '../services/task-editor-dialog.service';
 
 @Component({
   selector: 'app-root',

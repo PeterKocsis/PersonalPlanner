@@ -13,7 +13,7 @@
     <mat-form-field>
         <mat-label>Assigned Space</mat-label>
         <mat-select [(value)]="selectedSpace">
-            @for (space of spaces(); track space?._id) {
+            @for (space of taskeditorDialogService.spaces(); track space?._id) {
             <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
             }
         </mat-select>

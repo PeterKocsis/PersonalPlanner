@@ -4,7 +4,7 @@ import {
   DragDropModule,
   moveItemInArray,
 } from '@angular/cdk/drag-drop';
-import { SpacesService } from '../../services/spaces.service';
+import { SpacesService } from '../../adapters/spaces.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +20,7 @@ import { SpaceItemComponent } from './space-item/space-item.component';
     MatInput,
     FormsModule,
     MatButton,
-    SpaceItemComponent
+    SpaceItemComponent,
   ],
   templateUrl: './space-manager.component.html',
   styleUrl: './space-manager.component.scss',

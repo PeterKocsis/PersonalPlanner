@@ -1,5 +1,5 @@
 import { Component, inject } from '@angular/core';
-import { SpacesService } from '../../../services/spaces.service';
+import { SpacesService } from '../../../adapters/spaces.service';
 import {
   MatListItemMeta,
   MatListItemTitle,

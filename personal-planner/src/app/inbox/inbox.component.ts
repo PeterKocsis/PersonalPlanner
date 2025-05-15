@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { MatButton, MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInput } from '@angular/material/input';
-import { SpacesService } from '../../services/spaces.service';
+import { SpacesService } from '../../adapters/spaces.service';
 import { SpaceViewComponent } from '../space-view/space-view.component';
 import { MatTableModule } from '@angular/material/table';
 import { MatCheckboxModule } from '@angular/material/checkbox';

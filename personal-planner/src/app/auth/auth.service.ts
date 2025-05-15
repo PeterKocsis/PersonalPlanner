@@ -4,7 +4,7 @@ import { IAuthData } from './auth.data.interface';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { LocalStorageService } from '../../services/local-storage.service';
+import { LocalStorageService } from '../../adapters/local-storage.service';
 
 @Injectable({
   providedIn: 'root',
