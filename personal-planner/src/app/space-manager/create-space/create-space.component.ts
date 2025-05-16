@@ -12,7 +12,7 @@ export class CreateSpaceComponent {
 
   createSpace() {
     const spaceName = 'New Space'; // This should be replaced with actual input from the user
-    this.spaceService.addSpace({ displayName: spaceName, _id: '' });
+    this.spaceService.addSpace(spaceName);
   }
 
   cancel() {

@@ -6,6 +6,7 @@ import { HeaderComponent } from './header/header.component';
 import { NavigationPanelComponent } from './navigation-panel/navigation-panel.component';
 import { AuthService } from './auth/auth.service';
 import { TaskEditorDialogService } from '../services/task-editor-dialog.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-root',
@@ -15,6 +16,7 @@ import { TaskEditorDialogService } from '../services/task-editor-dialog.service'
     MatSidenavModule,
     MatIconModule,
     HeaderComponent,
+    MatButtonModule
   ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.scss',
@@ -23,8 +25,9 @@ export class AppComponent implements OnInit {
   title = 'personal-planner';
 
   private authService = inject(AuthService);
-  isLoggedIn = this.authService.userAuthenticated();
+  userIsAuthenticated = this.authService.userAuthenticated;
   @ViewChild('drawer', { static: true }) navigationPanel!: MatDrawer;
+  taskEditorDialogService = inject(TaskEditorDialogService);
 
   constructor() {
     effect(() => {
@@ -36,6 +39,10 @@ export class AppComponent implements OnInit {
         this.navigationPanel.close();
       }
     });
+  }
+
+  onAddTask() {
+    this.taskEditorDialogService.addTask();
   }
 
   ngOnInit(): void {
