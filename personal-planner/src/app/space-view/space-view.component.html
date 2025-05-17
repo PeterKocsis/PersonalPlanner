@@ -1,11 +1,4 @@
-<form>
-    <mat-form-field appearance="fill">
-        <mat-label>Task Title</mat-label>
-        <input matInput [(ngModel)]="newTaskTitle" name="taskTitle" required>
-    </mat-form-field>
 
-    <button mat-raised-button color="primary" (click)="onAddTask()">Add Task</button>
-</form>
 <h2>To Do</h2>
 @if (tasksToDo().length > 0) {
 <div class="example-list">
