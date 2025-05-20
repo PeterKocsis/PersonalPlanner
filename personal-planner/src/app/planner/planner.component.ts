@@ -1,13 +1,15 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatCardModule } from '@angular/material/card';
+import { MatCard, MatCardHeader, MatCardModule } from '@angular/material/card';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
 import { MonthSelectorComponent } from '../month-selector/month-selector.component';
+import { IWeek } from '../interfaces/week.interface';
+import { TimeFrameViewerComponent } from '../time-frame-viewer/time-frame-viewer.component';
 
 @Component({
   selector: 'app-planner',
@@ -20,23 +22,32 @@ import { MonthSelectorComponent } from '../month-selector/month-selector.compone
     MatDatepickerModule,
     MatIconModule,
     CommonModule,
-    MonthSelectorComponent
+    MonthSelectorComponent,
+    TimeFrameViewerComponent
   ],
   templateUrl: './planner.component.html',
   styleUrl: './planner.component.scss'
 })
-export class PlannerComponent {
+export class PlannerComponent implements AfterViewInit {
+  @ViewChild('cardHeader') cardHeaderElement!: ElementRef<HTMLElement>;
+
 onDateChanged(date: Date) {
   this.weeksOfMonth = this.getWeeksofMonth(date.getFullYear(), date.getMonth());
 }
   dateOfToday: Date = new Date();
-  weeksOfYear: { weekNumber: number; startDate: Date; endDate: Date }[] = [];
-  weeksOfMonth: { weekNumber: number; startDate: Date; endDate: Date }[] = [];
+  weeksOfYear: IWeek[] = [];
+  weeksOfMonth: IWeek[] = [];
   constructor() {
     this.weeksOfMonth = this.getWeeksofMonth(
       this.dateOfToday.getFullYear(),
       this.dateOfToday.getMonth()
     );
+  }
+
+  titleWidth = '100px';
+  ngAfterViewInit(): void {
+    console.log((this.cardHeaderElement.nativeElement.getBoundingClientRect().width));
+
   }
 
 
