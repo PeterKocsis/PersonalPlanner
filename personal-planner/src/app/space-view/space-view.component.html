@@ -1,29 +1,35 @@
-
-<h2>To Do</h2>
-@if (tasksToDo().length > 0) {
-<div class="example-list">
-    @for (task of tasksToDo(); track task._id) {
-    <app-task-list-item [task]="task"></app-task-list-item>
-    }
-</div>
-}
-@else {
-<div class="example-list">
-    <div style="display: flex; flex-direction: column; padding: 10px; border-bottom: 1px solid #ccc;">
-        <h2 style="margin: auto; padding-bottom: 10px;">You are done, great work :{{')'}}</h2>
-        <button (click)="onAddTask()" style="align-self: center; margin: auto;" mat-mini-fab color="primary">
-            <mat-icon>add_2</mat-icon>
-        </button>
+<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; height: 90%;">
+    <div style="display: flex; flex-direction: column;">
+        <h2>To Do</h2>
+        @if (tasksToDo().length > 0) {
+        <div class="example-list">
+            @for (task of tasksToDo(); track task._id) {
+            <app-task-list-item [task]="task"></app-task-list-item>
+            }
+        </div>
+        }
+        @else {
+        <div class="example-list">
+            <div style="display: flex; flex-direction: column; padding: 10px; border-bottom: 1px solid #ccc;">
+                <h2 style="margin: auto; padding-bottom: 10px;">You are done, great work :{{')'}}</h2>
+                <button (click)="onAddTask()" style="align-self: center; margin: auto;" mat-mini-fab color="primary">
+                    <mat-icon>add_2</mat-icon>
+                </button>
+            </div>
+        </div>
+        }
+        
+        @if (tasksCompleted().length > 0) {
+        
+        <h2 style="margin-top: 20px;">Finished tasks</h2>
+        <div class="example-list">
+            @for (task of tasksCompleted(); track task._id) {
+            <app-task-list-item [task]="task"></app-task-list-item>
+            }
+        </div>
+        }
+    </div>
+    <div style="display: flex; flex-direction: column;">
+        <app-time-frame-viewer style="height: 100%;" [week]="selectedTimeFrame"></app-time-frame-viewer>
     </div>
 </div>
-}
-
-@if (tasksCompleted().length > 0) {
-
-<h2 style="margin-top: 20px;">Finished tasks</h2>
-<div class="example-list">
-    @for (task of tasksCompleted(); track task._id) {
-    <app-task-list-item [task]="task"></app-task-list-item>
-    }
-</div>
-}

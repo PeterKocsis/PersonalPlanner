@@ -1,5 +1,5 @@
-export interface IWeek {
-    weekNumber: number;
-    startDate: Date;
-    endDate: Date;
+export interface ITimeFrame {
+  index: number;
+  startDate: Date;
+  endDate: Date;
 }

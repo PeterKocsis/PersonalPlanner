@@ -16,6 +16,9 @@ import { TaskListItemComponent } from '../task/task-list-item/task-list-item.com
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskEditorDialogService } from '../../services/task-editor-dialog.service';
+import { TimeFrameViewerComponent } from '../time-frame-viewer/time-frame-viewer.component';
+import { ITimeFrame } from '../interfaces/week.interface';
+import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.service';
 
 @Component({
   selector: 'app-space-view',
@@ -27,6 +30,7 @@ import { TaskEditorDialogService } from '../../services/task-editor-dialog.servi
     MatButtonModule,
     TaskListItemComponent,
     MatIconModule,
+    TimeFrameViewerComponent
   ],
   templateUrl: './space-view.component.html',
   styleUrl: './space-view.component.scss',
@@ -36,7 +40,9 @@ export class SpaceViewComponent {
   spacesService = inject(SpacesService);
   taskEditorDialogService = inject(TaskEditorDialogService);
   spaceId = input.required<string>();
+  timeFrameService = inject(TimeFrameAdapterService);
   dialog = inject(MatDialog);
+  selectedTimeFrame: ITimeFrame = this.timeFrameService.getCurrentTimeFrame();
   tasksToDo = computed<ITask[]>(() => {
     return this.taskService
     .tasks()
