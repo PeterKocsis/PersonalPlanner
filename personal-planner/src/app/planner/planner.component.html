@@ -5,8 +5,8 @@
     <h2>Weeks of the selected month</h2>
     <!-- Make grid element with 5 colums with equal width -->
     <div style="display: grid; gap: 1rem; height: 100%;">
-        @for (week of weeksOfMonth; track $index) {
-            <app-time-frame-viewer style="grid-row: 1;" [week]="week"></app-time-frame-viewer>
+        @for (timeFrame of timeFrames; track $index) {
+        <app-time-frame-viewer style="grid-row: 1;" [timeFrame]="timeFrame"></app-time-frame-viewer>
         }
     </div>
 

@@ -1,8 +1,5 @@
 import { CommonModule } from '@angular/common';
-import {
-  Component,
-  inject,
-} from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -33,23 +30,21 @@ import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.servi
   styleUrl: './planner.component.scss',
 })
 export class PlannerComponent {
-
   timeFrameService = inject(TimeFrameAdapterService);
 
   onDateChanged(date: Date) {
-    this.weeksOfMonth = this.timeFrameService.getWeeksofMonth(
+    this.timeFrames = this.timeFrameService.getWeeksofMonth(
       date.getFullYear(),
       date.getMonth()
     );
   }
   dateOfToday: Date = new Date();
   weeksOfYear: ITimeFrame[] = [];
-  weeksOfMonth: ITimeFrame[] = [];
+  timeFrames: ITimeFrame[] = [];
   constructor() {
-    this.weeksOfMonth = this.timeFrameService.getWeeksofMonth(
+    this.timeFrames = this.timeFrameService.getWeeksofMonth(
       this.dateOfToday.getFullYear(),
       this.dateOfToday.getMonth()
     );
   }
-
 }
