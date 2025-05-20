@@ -4,6 +4,7 @@ import { HTTP_INTERCEPTORS, provideHttpClient, withInterceptors } from '@angular
 
 import { routes } from './app.routes';
 import { authInterceptor } from './auth/auth-interceptor';
+import { provideNativeDateAdapter } from '@angular/material/core';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -11,6 +12,7 @@ export const appConfig: ApplicationConfig = {
     provideRouter(routes, withComponentInputBinding()),
     provideHttpClient(
       withInterceptors([authInterceptor]), // Add AuthInterceptor here
-    ) // Add HTTPClient provider here
+    ), // Add HTTPClient provider here
+    provideNativeDateAdapter()
   ]
 };

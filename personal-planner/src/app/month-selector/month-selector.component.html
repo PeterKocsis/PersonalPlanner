@@ -1,0 +1,15 @@
+<div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 1rem; align-items: center;">
+    <button mat-mini-fab color="primary" (click)="onDecrementMonth()">
+        <mat-icon>
+            chevron_left
+        </mat-icon>
+    </button>
+    <mat-label
+        style="font-size: large; text-align: center; font-weight: 600; width: 10%; min-width: 100px; max-width: 200px;">{{selectedDate() |
+        date: 'YYYY.MMMM'}}</mat-label>
+    <button mat-mini-fab color="primary" (click)="onIncrementMonth()">
+        <mat-icon>
+            chevron_right
+        </mat-icon>
+    </button>
+</div>

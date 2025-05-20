@@ -10,7 +10,7 @@
             <router-outlet></router-outlet>
             <!-- Add a button which is displayed on top of any other html element in the left bottom corner within mat-drawer-content -->
             @if (userIsAuthenticated()) {
-                <button (click)="onAddTask()" style="position: absolute; left: 2rem; bottom: 10%; z-index: 1000;" mat-fab extended color="primary">
+                <button (click)="onAddTask()" style="position: fixed; bottom: 2rem; z-index: 1000;" mat-fab extended color="primary">
                     <mat-icon>add_2</mat-icon>
                     Add Task
                 </button>

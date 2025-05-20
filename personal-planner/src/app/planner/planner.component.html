@@ -1,1 +1,32 @@
-<p>planner works!</p>
+<div style="height: 80%">
+    <app-month-selector [initialDate]="dateOfToday" (selectedDateChanaged)="onDateChanged($event)"></app-month-selector>
+
+    <hr color="#ccc" style="width: 100%; height: 2px; margin: 1rem 0;" />
+    <h2>Weeks of the selected month</h2>
+    <!-- Make grid element with 5 colums with equal width -->
+    <div style="display: grid; gap: 1rem; height: 100%;">
+        @for (week of weeksOfMonth; track $index) {
+        <mat-card style="grid-row: 1;height: 100%;">
+            <mat-card-header>
+                <mat-card-title style="text-align: center;">Week {{week.weekNumber}}</mat-card-title>
+                <mat-card-subtitle>
+                    <div style="display: flex; flex-direction: row; justify-content: space-between; width: 200px;">
+                        <p style="align-self: flex-start;"> {{week.startDate | date: 'MMM.dd'}} </p>
+                        <p style="align-self: flex-end;"> {{week.endDate | date: 'MMM.dd'}} </p>
+                    </div>
+                </mat-card-subtitle>
+            </mat-card-header>
+
+            <mat-card-content style="height: 100%;">
+                <p>Space occupation data</p>
+
+            </mat-card-content>
+            <mat-card-actions align="end">
+                <button mat-button color="primary">Open in Planner</button>
+            </mat-card-actions>
+        </mat-card>
+        }
+    </div>
+
+
+</div>
