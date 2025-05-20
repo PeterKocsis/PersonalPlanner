@@ -11,5 +11,5 @@ import { ITimeFrame } from '../interfaces/week.interface';
   styleUrl: './time-frame-viewer.component.scss',
 })
 export class TimeFrameViewerComponent {
-  week = input.required<ITimeFrame>();
+  timeFrame = input.required<ITimeFrame>();
 }
