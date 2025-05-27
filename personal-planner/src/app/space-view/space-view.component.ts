@@ -1,10 +1,5 @@
 import { DragDropModule } from '@angular/cdk/drag-drop';
-import {
-  Component,
-  computed,
-  inject,
-  input,
-} from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -17,8 +12,9 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskEditorDialogService } from '../../services/task-editor-dialog.service';
 import { TimeFrameViewerComponent } from '../time-frame-viewer/time-frame-viewer.component';
-import { ITimeFrame } from '../interfaces/week.interface';
+import { ITimeFrame } from '../interfaces/time-frame.interface';
 import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.service';
+import { AsyncPipe, CommonModule } from '@angular/common';
 
 @Component({
   selector: 'app-space-view',
@@ -29,8 +25,10 @@ import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.servi
     FormsModule,
     MatButtonModule,
     TaskListItemComponent,
+    CommonModule,
+    AsyncPipe,
     MatIconModule,
-    TimeFrameViewerComponent
+    TimeFrameViewerComponent,
   ],
   templateUrl: './space-view.component.html',
   styleUrl: './space-view.component.scss',
@@ -42,25 +40,25 @@ export class SpaceViewComponent {
   spaceId = input.required<string>();
   timeFrameService = inject(TimeFrameAdapterService);
   dialog = inject(MatDialog);
-  selectedTimeFrame: ITimeFrame = this.timeFrameService.getCurrentTimeFrame();
+  today = new Date();
   tasksToDo = computed<ITask[]>(() => {
     return this.taskService
-    .tasks()
-    .filter(
-      (task: ITask) =>
-        task.spaceId === this.spaceId() && task.completed === false
-    );
+      .tasks()
+      .filter(
+        (task: ITask) =>
+          task.spaceId === this.spaceId() && task.completed === false
+      );
   });
-  
+
   tasksCompleted = computed<ITask[]>(() => {
     return this.taskService
-    .tasks()
-    .filter(
-      (task: ITask) =>
-        task.spaceId === this.spaceId() && task.completed === true
-    );
+      .tasks()
+      .filter(
+        (task: ITask) =>
+          task.spaceId === this.spaceId() && task.completed === true
+      );
   });
-  
+
   newTaskTitle: string = '';
 
   onAddTask() {

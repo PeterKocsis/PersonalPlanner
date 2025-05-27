@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, input } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
-import { ITimeFrame } from '../interfaces/week.interface';
+import { ITimeFrame } from '../interfaces/time-frame.interface';
 
 @Component({
   selector: 'app-time-frame-viewer',

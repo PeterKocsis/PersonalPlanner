@@ -28,6 +28,7 @@ router.post('', checkAuth, (req, res, next) => {
         spaceId: task.spaceId,
         timeToCompleteMinutes: task.timeToCompleteMinutes,
         completed: task.completed,
+        ownerId: req.userData.userId
     });
     newTask.save()
         .then(() => {
@@ -67,7 +68,7 @@ router.put('/:id', checkAuth, async (req, res, next)=> {
     try {
         const updatedTask = await Task
             .findOne({_id: req.params.id})
-            .updateOne({ spaceId: task.spaceId, title: task.title, description: task.description, timeToCompleteMinutes: task.timeToCompleteMinutes });
+            .updateOne({ spaceId: task.spaceId, title: task.title, description: task.description, timeToCompleteMinutes: task.timeToCompleteMinutes, completed: task.completed, frameTasksToScheduleId: task.frameTasksToScheduleId || null });
         console.log(`Task updated ${updatedTask}`);
         console.log(updatedTask)
         res.status(200).json(

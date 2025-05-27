@@ -1,107 +1,159 @@
-import { Injectable } from '@angular/core';
-import { ITimeFrame } from '../app/interfaces/week.interface';
+import { inject, Injectable, signal } from '@angular/core';
+import { ITimeFrame } from '../app/interfaces/time-frame.interface';
+import { HttpClient } from '@angular/common/http';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class TimeFrameAdapterService {
-  getCurrentTimeFrame(): ITimeFrame {
-    const date = new Date();
-    const weeksOfCurrentMonth = this.getWeeksofMonth(date.getFullYear(), date.getMonth());
-    return weeksOfCurrentMonth.filter(week => week.startDate <= date && date <= week.endDate)[0];
-  }
+  http = inject(HttpClient);
 
-  constructor() { }
+  timeFrames = signal<ITimeFrame[]>([]);
+  selectedTimeFrame = signal<ITimeFrame | null>(null);
 
-  getWeeksofMonth(
-    year: number,
-    month: number
-  ): ITimeFrame[] {
-    const weeks: ITimeFrame[] = [];
-    const firstDayOfMonth = new Date(year, month, 1);
-    const lastDayOfMonth = new Date(year, month + 1, 0);
-    let firstDayOfWeek = this.getTheStartOfWeek(firstDayOfMonth);
-    let lastDayOfWeekInMonth = this.getTheEndOfWeek(lastDayOfMonth);
-    let weekNumber = this.getWeekNumber(firstDayOfWeek);
-    while (firstDayOfWeek < lastDayOfWeekInMonth) {
-      const startDate = new Date(firstDayOfWeek);
-      const endDate = new Date(firstDayOfWeek);
-      endDate.setDate(endDate.getDate() + 6);
-      if (
-        startDate.getFullYear() !== endDate.getFullYear() &&
-        endDate.getMonth() === 0
-      ) {
-        weekNumber = 1;
+  constructor() {
+    const today = new Date();
+    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+    this.getTimeFrames(startOfMonth, endOfMonth).then((timeFrames) => {
+      this.timeFrames.set(timeFrames);
+    });
+    // this.getTimeFrames(today, today).then((timeFrames) => {
+    //   this.selectedTimeFrame.set(timeFrames[0]);
+    // });
+    this.getCurrentTimeFrame().then((timeFrame) => {
+      if (timeFrame) {
+        this.selectedTimeFrame.set(timeFrame);
       } else {
-        weekNumber++;
+        // Fallback to the first time frame of the current month
+        const firstTimeFrame = this.timeFrames()[0];
+        if (firstTimeFrame) {
+          this.selectedTimeFrame.set(firstTimeFrame);
+        }
       }
-      weeks.push({
-        index: weekNumber,
-        startDate: new Date(startDate),
-        endDate: new Date(endDate),
-      });
-      firstDayOfWeek.setDate(firstDayOfWeek.getDate() + 7);
-    }
-    return weeks;
+    });
   }
 
-  isMonday(date: Date): boolean {
-    return date.getDay() === 1;
+  getTimeFrames(startDate: Date, endDate: Date): Promise<ITimeFrame[]> {
+    return new Promise<ITimeFrame[]>((resolve, reject) => {
+      this.http
+        .get<{ message: string; timeFrames: ITimeFrame[] }>(
+          `http://localhost:3000/api/timeFrames?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+        )
+        .subscribe({
+          next: (response) => {
+            console.log('Fetched time frames:', response);
+            // this.cacheTimeFrames(response.timeFrames);
+            this.timeFrames.set(
+              response.timeFrames.map((timeFrame) => ({
+                ...timeFrame,
+                startDate: new Date(timeFrame.startDate),
+                endDate: new Date(timeFrame.endDate),
+              }))
+            );
+            resolve(
+              response.timeFrames.map((timeFrame) => ({
+                ...timeFrame,
+                startDate: new Date(timeFrame.startDate),
+                endDate: new Date(timeFrame.endDate),
+              }))
+            );
+          },
+          error: (error) => {
+            console.error('Error fetching time frames:', error);
+            reject(error);
+          },
+        });
+    });
   }
 
-  isSunday(date: Date): boolean {
-    return date.getDay() === 0;
+
+  getCurrentTimeFrame(): Promise<ITimeFrame | null> {
+    return new Promise<ITimeFrame | null>((resolve, reject) => {
+      this.http
+        .get<{ message: string; timeFrame: ITimeFrame }>(
+          'http://localhost:3000/api/timeFrames/current'
+        )
+        .subscribe({
+          next: (response) => {
+            console.log('Fetched current time frame:', response);
+            const timeFrame = {
+              ...response.timeFrame,
+              startDate: new Date(response.timeFrame.startDate),
+              endDate: new Date(response.timeFrame.endDate),
+            };
+            resolve(timeFrame);
+          },
+          error: (error) => {
+            console.error('Error fetching current time frame:', error);
+            reject(error);
+          },
+        });
+    });
   }
 
-  getTheStartOfWeek(date: Date): Date {
-    if (this.isMonday(date)) {
-      return date;
+  async selectNextTimeFrame(relativeTo: ITimeFrame): Promise<void> {
+    const nextFrame = this.timeFrames().find((timeFrame) => {
+      const diffInDays =
+        (timeFrame.startDate.getTime() - relativeTo.startDate.getTime()) /
+        1000 /
+        3600 /
+        24;
+      if (diffInDays > 0 && diffInDays < 2) return true;
+      return false;
+    });
+    if (nextFrame) {
+      this.selectedTimeFrame.set(nextFrame);
+    } else {
+      const nextFrame = await this.getNextTimeFrame(relativeTo);
+      this.selectedTimeFrame.set(nextFrame);
     }
-    // If the date is not a Monday, find the previous Monday
-    const day = date.getDay() === 0 ? 6 : date.getDay() - 1; // Adjust for Sunday (0) to be the last day of the week
-
-    const startOfWeek = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate() - day
-    );
-    return startOfWeek;
   }
 
-  getWeekNumber(date: Date): number {
-    const startOfYear = new Date(date.getFullYear(), 0, 1);
-    while (startOfYear.getDay() !== 1) {
-      startOfYear.setDate(startOfYear.getDate() + 1);
-    }
-    // Calculate the number of days between the start of the year and the given date
-    const days = Math.floor(
-      (date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24)
-    );
-    // Calculate the week number
-    const weekNumber = Math.floor(days / 7) + 1;
-    return weekNumber;
+  getNextTimeFrame(currentFrame: ITimeFrame): Promise<ITimeFrame | null> {
+    return new Promise<ITimeFrame | null>((resolve, reject) => {
+      this.http
+        .get<{ message: string; timeFrame: ITimeFrame }>(
+          `http://localhost:3000/api/timeFrames/next?currentStartDate=${currentFrame.startDate.toISOString()}&currentEndDate=${currentFrame.endDate.toISOString()}`
+        )
+        .subscribe({
+          next: (response) => {
+            console.log('Fetched next time frame:', response);
+            const timeFrame = {
+              ...response.timeFrame,
+              startDate: new Date(response.timeFrame.startDate),
+              endDate: new Date(response.timeFrame.endDate),
+            };
+            resolve(timeFrame);
+          },
+          error: (error) => {
+            console.error('Error fetching next time frame:', error);
+            reject(error);
+          },
+        });
+    });
   }
 
-  getTheEndOfWeek(date: Date): Date {
-    if (this.isSunday(date)) {
-      return date;
+  async selectPreviousTimeFrame(relativeTo: ITimeFrame): Promise<void> {
+    const previousFrame = this.timeFrames().find((timeFrame) => {
+      const diffInDays =
+        (relativeTo.startDate.getTime() - timeFrame.startDate.getTime()) /
+        1000 /
+        3600 /
+        24;
+      if (diffInDays > 0 && diffInDays < 2) return true;
+      return false;
+    });
+    if (previousFrame) {
+      this.selectedTimeFrame.set(previousFrame);
+    } else {
+      // fetch previous time frame
+      const startDate = new Date(relativeTo.startDate);
+      startDate.setDate(startDate.getDate() - 7);
+      const endDate = new Date(relativeTo.startDate);
+      endDate.setDate(relativeTo.startDate.getDate() - 1);
+      const timeFrames = await this.getTimeFrames(startDate, endDate);
+      this.selectedTimeFrame.set(timeFrames[0]);
     }
-    // If the date is not a Monday, find the next Sunday
-    const addNumberOfDays = 6 - date.getDay();
-
-    const endOfWeek = new Date(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate() + addNumberOfDays
-    );
-    if (date.getMonth() !== endOfWeek.getMonth()) {
-      endOfWeek.setDate(0);
-    }
-    const startOfWeek = this.getTheStartOfWeek(endOfWeek);
-    return new Date(
-      startOfWeek.getFullYear(),
-      startOfWeek.getMonth(),
-      startOfWeek.getDate() - 1
-    );
   }
 }

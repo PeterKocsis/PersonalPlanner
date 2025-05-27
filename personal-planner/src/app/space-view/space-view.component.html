@@ -5,6 +5,7 @@
         <div class="example-list">
             @for (task of tasksToDo(); track task._id) {
             <app-task-list-item [task]="task"></app-task-list-item>
+
             }
         </div>
         }
@@ -18,9 +19,9 @@
             </div>
         </div>
         }
-        
+
         @if (tasksCompleted().length > 0) {
-        
+
         <h2 style="margin-top: 20px;">Finished tasks</h2>
         <div class="example-list">
             @for (task of tasksCompleted(); track task._id) {
@@ -30,6 +31,18 @@
         }
     </div>
     <div style="display: flex; flex-direction: column;">
-        <app-time-frame-viewer style="height: 100%;" [timeFrame]="selectedTimeFrame"></app-time-frame-viewer>
+        <div style="display: flex; width: 100%; align-items: center;">
+            <button mat-icon-button
+                (click)="timeFrameService.selectPreviousTimeFrame(timeFrameService.selectedTimeFrame()!)">
+                <mat-icon>chevron_left</mat-icon>
+            </button>
+            <h2 style="margin: 0px;">Week {{timeFrameService.selectedTimeFrame()!.index}}</h2>
+            <button mat-icon-button
+                (click)="timeFrameService.selectNextTimeFrame(timeFrameService.selectedTimeFrame()!)">
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+        </div>
+        <app-time-frame-viewer style="height: 100%;"
+            [timeFrame]="timeFrameService.selectedTimeFrame()! "></app-time-frame-viewer>
     </div>
 </div>

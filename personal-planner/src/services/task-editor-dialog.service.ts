@@ -24,6 +24,7 @@ export class TaskEditorDialogService {
 
   private _tempTask: ITask | undefined = undefined;
 
+  //TODO This solution is not ideal. It does not handle cases when the browser reloads the page which has spaceId in the URL.
   constructor(private router: Router, private activatedRoute: ActivatedRoute) {
     this.router.events
       .pipe(filter(event => event instanceof NavigationEnd))
@@ -71,10 +72,19 @@ export class TaskEditorDialogService {
       this._tempTask.title = title;
       this.saveTask(this._tempTask);
     } else {
-      this.dialog.open(TaskEditorDialogComponent, {
+      const dialogRef = this.dialog.open(TaskEditorDialogComponent, {
         data: { task: this._tempTask, spaceId: this._tempTask.spaceId },
         width: '500px',
       });
+      dialogRef.beforeClosed().subscribe(result => {
+        if (result) {
+          this.saveTask(this._tempTask!);
+          
+        } else {
+          this._tempTask = undefined; // Reset temp task if dialog is closed without saving
+        }
+      }
+      );
     }
   }
 
