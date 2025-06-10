@@ -18,17 +18,30 @@ export class MonthSelectorComponent {
     return this.getRange(new Date());
   })());
   selectedDateChanaged = output<{startDate: Date, endDate: Date}>();
-
+  
   constructor() {
     effect(() => {
       this.selectedDateChanaged.emit(this.selectedDate());
     });
   }
-
+  
   private getRange(currentDate: Date) {
     const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
     const endOfMonth = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 0);
     return {startDate: startOfMonth, endDate: endOfMonth};
+  }
+  
+  onSelectCurrentMonth() {
+    this.selectedDate.set(this.getRange(new Date()));
+  }
+
+  isCurrentMonthSelected() {
+    const currentDate = new Date();
+    const selected = this.selectedDate();
+    return (
+      selected.startDate.getFullYear() === currentDate.getFullYear() &&
+      selected.startDate.getMonth() === currentDate.getMonth()
+    );
   }
   
   onIncrementMonth() {

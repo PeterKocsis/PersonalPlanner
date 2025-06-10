@@ -12,4 +12,7 @@
             chevron_right
         </mat-icon>
     </button>
+    @if (!isCurrentMonthSelected()) {
+        <button mat-raised-button color="primary" (click)="onSelectCurrentMonth()">Back to current month</button>
+    }
 </div>
