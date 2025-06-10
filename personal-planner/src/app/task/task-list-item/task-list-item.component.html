@@ -2,7 +2,6 @@
     (mouseleave)="onMouseLeave()" style="overflow: visible;">
     <mat-checkbox class="task-data"></mat-checkbox>
     <h3 class="task-data">{{task().title}}</h3>
-    <p class="task-data">{{task().description}}</p>
     <div style="display: flex; margin-left: auto; flex-direction: row; align-items: center;"
         [style.visibility]="itemHovered ? 'visible' : 'hidden'">
         <button mat-icon-button (click)="onEdit()">
@@ -22,7 +21,7 @@
             }
         </button>
     </div>
-    <button mat-icon-button style="margin-left: auto;">
+    <button mat-icon-button style="margin-left: auto;" (click)="onAssignTimeFrame()">
         <mat-icon class="material-icons-outlined">arrow_forward</mat-icon>
     </button>
 </div>

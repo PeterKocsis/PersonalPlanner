@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const frameTasksToSchedule = require('./frameTasksToSchedule');
+const frameTasksToSchedule = require('./schedulePocket');
 
 const taskShema = mongoose.Schema({
     title: { type: String, required: true },
@@ -8,7 +8,7 @@ const taskShema = mongoose.Schema({
     spaceId: { type: String, required: true },
     completed: { type: Boolean, default: false },
     timeToCompleteMinutes: { type: Number, default: 0 },
-    scheduledTime: { type: Date, default: undefined },
+    scheduledDayId: { type: mongoose.Schema.Types.ObjectId, ref: 'DaySchedule', default: null },
     frameTasksToScheduleId: { type: mongoose.Schema.Types.ObjectId, ref: 'FrameTasksToSchedule', default: null },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });

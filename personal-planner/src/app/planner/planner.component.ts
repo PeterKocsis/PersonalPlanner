@@ -32,25 +32,9 @@ import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.servi
 export class PlannerComponent {
   timeFrameService = inject(TimeFrameAdapterService);
   timeFrames = this.timeFrameService.timeFrames;
-  dateOfToday = new Date();
   
-  onDateChanged(date: Date) {
-    const dateRange = this.monthRangeFromDate(date);
-    this.timeFrameService.getTimeFrames(dateRange.startOfMonth, dateRange.endOfMonth);
-  }
-  
-  constructor() {
-    const dateRange = this.monthRangeFromDate(new Date());
-    this.timeFrameService.getTimeFrames(dateRange.startOfMonth, dateRange.endOfMonth);
+  onDateChanged(timeRange: {startDate: Date, endDate: Date}) {
+    this.timeFrameService.getTimeFrames(timeRange.startDate, timeRange.endDate);
   }
 
-  private monthRangeFromDate(date: Date): {startOfMonth: Date, endOfMonth: Date} {
-    const startOfMonth = new Date(date.getFullYear(), date.getMonth(), 1);
-    const endOfMonth = new Date(
-      date.getFullYear(),
-      date.getMonth() + 1,
-      0
-    );
-    return { startOfMonth, endOfMonth };
-  }
 }

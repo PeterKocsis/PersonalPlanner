@@ -10,7 +10,7 @@ import { SpacesService } from '../../../adapters/spaces.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TaskEditorDialogComponent } from '../task-editor-dialog/task-editor-dialog.component';
 import { TaskEditorDialogService } from '../../../services/task-editor-dialog.service';
-
+import { TimeFrameAdapterService } from '../../../adapters/time-frame.adapter.service';
 
 @Component({
   selector: 'app-task-list-item',
@@ -30,6 +30,7 @@ export class TaskListItemComponent {
   taskService = inject(TaskAdapterService);
   spaceServie = inject(SpacesService);
   taskEditorDialogService = inject(TaskEditorDialogService);
+  timeFrameAdapterService = inject(TimeFrameAdapterService);
   dialog = inject(MatDialog);
   itemHovered = false;
   spaces = computed(() => [
@@ -60,5 +61,15 @@ export class TaskListItemComponent {
 
   onToggleComplete() {
     this.taskService.setTaskState(this.task()._id, !this.task().completed);
+  }
+
+  onAssignTimeFrame() {
+    this.timeFrameAdapterService.addTaskToTimeFrame(
+      this.task()._id,
+      this.timeFrameAdapterService
+        .selectedTimeFrame()
+        ?.startDate.getFullYear() || new Date().getFullYear(),
+      this.timeFrameAdapterService.selectedTimeFrame()?.index || 0
+    );
   }
 }

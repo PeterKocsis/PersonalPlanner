@@ -33,12 +33,12 @@
     <div style="display: flex; flex-direction: column;">
         <div style="display: flex; width: 100%; align-items: center;">
             <button mat-icon-button
-                (click)="timeFrameService.selectPreviousTimeFrame(timeFrameService.selectedTimeFrame()!)">
+                (click)="timeFrameService.selectPreviousTimeFrame()">
                 <mat-icon>chevron_left</mat-icon>
             </button>
             <h2 style="margin: 0px;">Week {{timeFrameService.selectedTimeFrame()!.index}}</h2>
             <button mat-icon-button
-                (click)="timeFrameService.selectNextTimeFrame(timeFrameService.selectedTimeFrame()!)">
+                (click)="timeFrameService.selectNextTimeFrame()">
                 <mat-icon>chevron_right</mat-icon>
             </button>
         </div>

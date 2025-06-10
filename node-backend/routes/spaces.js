@@ -116,9 +116,9 @@ router.get('', checkAuth, async (req, res, next) => {
                 sortedSpaces.push(space);
             }
         });
-        console.log('Sorted spaces:', sortedSpaces);
+        // console.log('Sorted spaces:', sortedSpaces);
         await session.commitTransaction();
-        console.log('Spaces fetched successfully!');
+        // console.log('Spaces fetched successfully!');
 
         res.status(200).json({
             message: 'Spaces fetched successfully!',
@@ -151,7 +151,7 @@ router.get('/inbox', checkAuth, async (req, res, next) => {
             });
         }
 
-        console.log('Inbox space:', inboxSpace);
+        // console.log('Inbox space:', inboxSpace);
         res.status(200).json({
             message: 'Inbox space fetched successfully!',
             inboxSpace: inboxSpace

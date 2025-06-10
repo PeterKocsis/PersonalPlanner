@@ -1,109 +1,53 @@
 const express = require('express');
 const router = express.Router();
 const Task = require('../models/task');
-const TimeFrameUnscheduledTasks = require('../models/frameTasksToSchedule');
+const SchedulePocketModel = require('../models/schedulePocket');
 const daySchedule = require('../models/daySchedule');
-const { getTimeFramesFromDateRange, getWrapperTimeFrame, getNextTimeFrame, getPreviousTimeFrame } = require('../utilities/time-frame-helper');
-
+const { getTimeRangesFromDateRange, getNextTimeRange, getPrviousTimeRange, getTimeRangeByIndex } = require('../utilities/time-range-helper');
+const { collectFrameData } = require('../utilities/time-frame-helper');
 const checkAuth = require('../middleware/check-auth');
 
-router.get('', checkAuth, (req, res, next) => {
+
+router.get('', checkAuth, async (req, res, next) => {
+    let timeRanges = [];
     const { startDate, endDate } = req.query;
     console.log('Received query parameters:', { startDate, endDate });
 
     // Validate query parameters
-    if (!startDate || !endDate) {
-        return res.status(400).json({
-            message: 'Missing required query parameters: startDate and endDate',
-        });
-    }
-
-    // Parse and validate dates
-    
-    const start = new Date(startDate);
-    const end = new Date(endDate);
-
-    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-        return res.status(400).json({
-            message: 'Invalid date format. Use a valid ISO date string.',
-        });
-    }
-
-    // Ensure startDate is before endDate
-    if (start > end) {
-        return res.status(400).json({
-            message: 'startDate must be earlier than endDate',
-        });
-    }
-
-    console.log('Received date range:', { startDate, endDate });
-
     try {
-        // Fetch time frames within the specified date range
-        const timeFrames = getTimeFramesFromDateRange(start, end);
-        // Get day schedules for the time frames
-        console.log('Time frames:', timeFrames);
+        timeRanges = getTimeRangesFromDateRange(startDate, endDate);
 
+        //Fetch pockets for date rage
+        console.log('Fetched time ranges:', timeRanges);
+        const timeRangesWithPocketTasks2 = await collectFrameData(timeRanges, req.userData.userId);
+
+        console.log('Time frames:', timeRangesWithPocketTasks2);
         res.status(200).json({
             message: 'Time frames fetched successfully',
-            timeFrames,
+            timeFrames: timeRangesWithPocketTasks2,
         });
     } catch (error) {
-        console.error('Error fetching time frames:', error);
-        res.status(500).json({
-            message: 'Error fetching time frames',
+        console.log('Error fetching time frames:', error);
+        return res.status(400).json({
+            message: error.message || 'Error fetching time frames',
         });
     }
 });
-
-router.get('/current', checkAuth, async (req, res, next) => {
-    try {
-        const currentDate = new Date();
-
-        res.status(200).json({
-            message: 'Current time frame fetched successfully',
-            timeFrame: getWrapperTimeFrame(currentDate),
-        });
-    } catch (error) {
-        console.error('Error fetching current time frame:', error);
-        res.status(500).json({
-            message: 'Error fetching current time frame',
-        });
-    }
-}
-);
 
 router.get('/next', checkAuth, async (req, res, next) => {
     try {
         const { currentStartDate, currentEndDate } = req.query;
         console.log('Received query parameters for next time frame:', { currentStart: currentStartDate, currentEnd: currentEndDate });
-        // Validate query parameters
-        if (!currentStartDate || !currentEndDate) {
-            return res.status(400).json({
-                message: 'Missing required query parameters: currentStart and currentEnd',
-            });
-        }
-        // Parse and validate dates
-        const start = new Date(currentStartDate);
-        const end = new Date(currentEndDate);
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            return res.status(400).json({
-                message: 'Invalid date format. Use a valid ISO date string.',
-            });
-        }
-        // Ensure startDate is before endDate
-        if (start > end) {
-            return res.status(400).json({
-                message: 'currentStart must be earlier than currentEnd',
-            });
-        }
-        console.log('Received date range for next time frame:', { currentStart: currentStartDate, currentEnd: currentEndDate });
+        let timeRange = getTimeRangesFromDateRange(currentStartDate, currentEndDate);
+        
         // Fetch the next time frame
-        const nextTimeFrame = getNextTimeFrame(end);
+        const nextTimeRange = getNextTimeRange(timeRange[0].endDate);
+        const timeRangesWithPocketTasks2 = await collectFrameData([nextTimeRange], req.userData.userId);
 
+        console.log('Time frames:', timeRangesWithPocketTasks2);
         res.status(200).json({
-            message: 'Next time frame fetched successfully',
-            timeFrame: nextTimeFrame,
+            message: 'Time frames fetched successfully',
+            timeFrame: timeRangesWithPocketTasks2[0],
         });
     } catch (error) {
         console.error('Error fetching next time frame:', error);
@@ -116,33 +60,16 @@ router.get('/next', checkAuth, async (req, res, next) => {
 router.get('/previous', checkAuth, async (req, res, next) => {
     try {
         const { currentStartDate, currentEndDate } = req.query;
-        console.log('Received query parameters for previous time frame:', { currentStart: currentStartDate, currentEnd: currentEndDate });
-        // Validate query parameters
-        if (!currentStartDate || !currentEndDate) {
-            return res.status(400).json({
-                message: 'Missing required query parameters: currentStart and currentEnd',
-            });
-        }
-        // Parse and validate dates
-        const start = new Date(currentStartDate);
-        const end = new Date(currentEndDate);
-        if (isNaN(start.getTime()) || isNaN(end.getTime())) {
-            return res.status(400).json({
-                message: 'Invalid date format. Use a valid ISO date string.',
-            });
-        }
-        // Ensure startDate is before endDate
-        if (start > end) {
-            return res.status(400).json({
-                message: 'currentStart must be earlier than currentEnd',
-            });
-        }
-        console.log('Received date range for previous time frame:', { currentStart: currentStartDate, currentEnd: currentEndDate });
-        const previousTimeFrame = getPreviousTimeFrame(end);
+        timeRange = getTimeRangesFromDateRange(currentStartDate, currentEndDate);
+        
+        const previousTimeRange = getPrviousTimeRange(timeRange[0].startDate);
 
+        const timeRangesWithPocketTasks2 = await collectFrameData([previousTimeRange], req.userData.userId);
+
+        console.log('Time frames:', timeRangesWithPocketTasks2);
         res.status(200).json({
-            message: 'Previous time frame fetched successfully',
-            timeFrame: previousTimeFrame,
+            message: 'Time frames fetched successfully',
+            timeFrame: timeRangesWithPocketTasks2[0],
         });
     } catch (error) {
         console.error('Error fetching previous time frame:', error);
@@ -152,34 +79,98 @@ router.get('/previous', checkAuth, async (req, res, next) => {
     }
 });
 
-router.post('', checkAuth, async (req, res, next) => {
-    const { startDate, endDate, index, } = req.body;
-
-    if (!startDate || !endDate) {
+router.post('/:year/:index', checkAuth, async (req, res, next) => {
+    // Extract year and index from the request parameters
+    const { year, index } = req.params;
+    const { taskId } = req.body;
+    console.log('Received request to assign task:', { year, index, taskId });
+    // Validate the request body
+    if (!taskId) {
         return res.status(400).json({
-            message: 'Missing required fields: startDate and endDate',
+            message: 'Missing required field: taskId',
         });
     }
-
-    try {
-        const newTimeFrame = new TimeFrame({
-            index: index,
-            startDate: new Date(startDate),
-            endDate: new Date(endDate),
-            ownerId: req.userData.userId,
+    // Validate year and index
+    if (!year || !index) {
+        return res.status(400).json({
+            message: 'Missing required parameters: year and index',
         });
+    }
+    // Parse year and index to integers
+    const parsedYear = parseInt(year);
+    const parsedIndex = parseInt(index);
+    if (isNaN(parsedYear) || isNaN(parsedIndex)) {
+        return res.status(400).json({
+            message: 'Invalid year or index format',
+        });
+    }
+    // Check if there is a frameTasksToSchedule document for the user with the specified year and index
+    const mongoose = require('mongoose');
+    let session = null;
+    try {
+        session = await mongoose.startSession();
+        session.startTransaction();
 
-        const savedTimeFrame = await newTimeFrame.save();
-        res.status(201).json({
-            message: 'Time frame created successfully',
-            timeFrame: savedTimeFrame,
+        const timeFrame = getTimeRangeByIndex(parsedYear, parsedIndex);
+        console.log('Time frame for assignment:', timeFrame);
+
+        // Find or create a TimeFrameUnscheduledTasks document for the user
+        let frameTasksToSchedule = await SchedulePocketModel.findOne({
+            ownerId: req.userData.userId,
+            year: parsedYear,
+            index: parsedIndex
+        }).session(session);
+
+        if (!frameTasksToSchedule) {
+            frameTasksToSchedule = new SchedulePocketModel({
+                ownerId: req.userData.userId,
+                year: parsedYear,
+                index: parsedIndex,
+                taskIds: []
+            });
+        }
+
+        // Add the task to the tasks array
+        frameTasksToSchedule.taskIds.push(taskId);
+        await frameTasksToSchedule.save({ session });
+
+        // Update the task with the frameTasksToScheduleId
+        const task = await Task.findById(taskId).session(session);
+        if (!task) {
+            throw new Error('Task not found');
+        }
+        task.frameTasksToScheduleId = frameTasksToSchedule._id;
+        await task.save({ session });
+
+        // Get all task within the frameTasksToSchedule
+        let tasks = [];
+        for (const taskId of frameTasksToSchedule.taskIds) {
+            const task = await Task.findById(taskId).session(session);
+            if (task) {
+                tasks.push(await Task.findById(taskId).session(session));
+            }
+        }
+        timeFrame.pocketsTasks = tasks;
+
+        await session.commitTransaction();
+        session.endSession();
+
+        res.status(200).json({
+            message: 'Task assigned successfully',
+            timeFrame,
+            task
         });
     } catch (error) {
-        console.error('Error creating time frame:', error);
+        if (session) {
+            await session.abortTransaction();
+            session.endSession();
+        }
+        console.error('Error assigning task:', error);
         res.status(500).json({
-            message: 'Error creating time frame',
+            message: 'Error assigning task',
         });
     }
+
 });
 
 module.exports = router;

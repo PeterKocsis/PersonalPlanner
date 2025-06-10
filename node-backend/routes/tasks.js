@@ -21,6 +21,32 @@ router.get('', checkAuth, (req, res, next) => {
 
 router.post('', checkAuth, (req, res, next) => {
     const task = req.body;
+    // if (!task.title || !task.description || !task.spaceId || task.timeToCompleteMinutes === undefined) {
+    //     return res.status(400).json({
+    //         message: 'Missing required fields: title, description, spaceId, or timeToCompleteMinutes'
+    //     });
+    // }
+    // if (typeof task.completed !== 'boolean') {
+    //     return res.status(400).json({
+    //         message: 'Invalid value for completed field, it should be a boolean'
+    //     });
+    // }
+    // if (task.timeToCompleteMinutes < 0) {
+    //     return res.status(400).json({
+    //         message: 'timeToCompleteMinutes cannot be negative'
+    //     });
+    // }
+    // if (task.frameTasksToScheduleId && typeof task.frameTasksToScheduleId !== 'string') {
+    //     return res.status(400).json({
+    //         message: 'frameTasksToScheduleId must be a string if provided'
+    //     });
+    // }
+    // if (task.scheduledDayId && typeof task.scheduledDayId !== 'string') {
+    //     return res.status(400).json({
+    //         message: 'scheduledDayId must be a string if provided'
+    //     });
+    // }
+
     console.log('Received task:', task);
     const newTask = new Task({
         title: task.title,
@@ -28,8 +54,11 @@ router.post('', checkAuth, (req, res, next) => {
         spaceId: task.spaceId,
         timeToCompleteMinutes: task.timeToCompleteMinutes,
         completed: task.completed,
-        ownerId: req.userData.userId
-    });
+        ownerId: req.userData.userId,
+        frameTasksToScheduleId: task.frameTasksToScheduleId || null,
+        scheduledDayId: task.scheduledDayId || undefined});
+
+    
     newTask.save()
         .then(() => {
             res.status(201).json({

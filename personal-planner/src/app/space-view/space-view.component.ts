@@ -46,7 +46,7 @@ export class SpaceViewComponent {
       .tasks()
       .filter(
         (task: ITask) =>
-          task.spaceId === this.spaceId() && task.completed === false
+          task.spaceId === this.spaceId() && task.completed === false && !task.frameTasksToScheduleId
       );
   });
 

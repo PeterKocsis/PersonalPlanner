@@ -2,10 +2,10 @@ import { ITaskQueue } from './task-queue.interface';
 import { ITask } from './task.interface';
 
 export interface ITimeFrame {
-  _id: string;
+  year: number;
   index: number;
   startDate: Date;
   endDate: Date;
-  unscheduledTasks: ITask[];
-  taskQueues: ITaskQueue[];
+  pocketsTasks: ITask[];
+  taskQueues?: ITaskQueue[];
 }
