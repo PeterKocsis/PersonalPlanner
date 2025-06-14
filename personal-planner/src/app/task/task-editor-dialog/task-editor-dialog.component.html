@@ -1,38 +1,42 @@
 <h2 mat-dialog-title>Edit Task</h2>
-<mat-dialog-content style="display: flex; flex-direction: column;">
-    <mat-form-field>
-        <mat-label>Title</mat-label>
-        <input matInput [(ngModel)]="task().title" />
-    </mat-form-field>
-    <mat-form-field>
-        <mat-label>Description</mat-label>
-        <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
-            cdkAutosizeMaxRows="5" [(ngModel)]="task().description" name="" id=""></textarea>
-        <!-- <input matInput [(ngModel)]="task().description" /> -->
-    </mat-form-field>
-    <mat-form-field>
-        <mat-label>Assigned Space</mat-label>
-        <mat-select [(value)]="selectedSpace">
-            @for (space of taskeditorDialogService.spaces(); track space?._id) {
-            <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
-            }
-        </mat-select>
-    </mat-form-field>
-    <mat-label>Estimated complation time</mat-label>
-    <mat-button-toggle-group name="estimatedDuration" [(ngModel)]="timeToFinish"
-        aria-label="Estimated Duration">
-        <mat-button-toggle value="5">5m</mat-button-toggle>
-        <mat-button-toggle value=15>15m</mat-button-toggle>
-        <mat-button-toggle value=30>30m</mat-button-toggle>
-        <mat-button-toggle value=60>1h</mat-button-toggle>
-        <mat-button-toggle value=120>2h</mat-button-toggle>
-        <mat-button-toggle value=240>4h</mat-button-toggle>
-        <mat-button-toggle value=480>8h</mat-button-toggle>
-        <mat-button-toggle value=960>8h+</mat-button-toggle>
-    </mat-button-toggle-group>
-    <!-- <mat-form-field>
-    </mat-form-field> -->
-</mat-dialog-content>
+<div style="display: flex; flex-direction: row; padding-left: 2rem; padding-right: 2rem; gap: 1rem;">
+    <mat-dialog-content style="display: flex; flex-direction: column; flex: 1;">
+        <mat-form-field>
+            <mat-label>Title</mat-label>
+            <input matInput [(ngModel)]="task().title" />
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
+                cdkAutosizeMaxRows="5" [(ngModel)]="task().description" name="" id=""></textarea>
+            <!-- <input matInput [(ngModel)]="task().description" /> -->
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Assigned Space</mat-label>
+            <mat-select [(value)]="selectedSpace">
+                @for (space of taskeditorDialogService.spaces(); track space?._id) {
+                <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+        <mat-label>Estimated complation time</mat-label>
+        <mat-button-toggle-group name="estimatedDuration" [(ngModel)]="timeToFinish"
+            aria-label="Estimated Duration">
+            <mat-button-toggle value="5">5m</mat-button-toggle>
+            <mat-button-toggle value=15>15m</mat-button-toggle>
+            <mat-button-toggle value=30>30m</mat-button-toggle>
+            <mat-button-toggle value=60>1h</mat-button-toggle>
+            <mat-button-toggle value=120>2h</mat-button-toggle>
+            <mat-button-toggle value=240>4h</mat-button-toggle>
+            <mat-button-toggle value=480>8h</mat-button-toggle>
+            <mat-button-toggle value=960>8h+</mat-button-toggle>
+        </mat-button-toggle-group>
+        <app-range-selector [timeUnit]="'week'" (selectionChanged)="onSelectionChanged($event)"></app-range-selector>
+        <!-- <mat-form-field>
+        </mat-form-field> -->
+    </mat-dialog-content>
+    <app-time-frame-viewer style="flex: 1;" [timeFrame]="selectedTimeFrame()!"></app-time-frame-viewer>
+</div>
 <mat-dialog-actions align="end">
     <button mat-raised-button (click)="onCancel()">Cancel</button>
     <button mat-raised-button color="primary" (click)="onAccept()" cdkFocusInitial>Ok</button>

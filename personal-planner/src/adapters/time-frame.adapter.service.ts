@@ -13,8 +13,6 @@ export class TimeFrameAdapterService {
   taskService = inject(TaskAdapterService)
 
   timeFrames = signal<ITimeFrame[]>([]);
-  // frameInProgress = signal<ITimeFrame | null>(null)
-  // selectedTimeFrame = signal<ITimeFrame | null>(null);
 
   constructor() {
     // Initialize frameInProgress asynchronously
@@ -94,74 +92,4 @@ export class TimeFrameAdapterService {
     });
     
   }
-
-  // async selectNextTimeFrame(): Promise<void> {
-  //   const nextFrame = await this.getNextTimeFrame(this.selectedTimeFrame()!);
-  //   this.selectedTimeFrame.set(nextFrame);
-  // }
-
-  getNextTimeFrame(currentFrame: ITimeFrame): Promise<ITimeFrame | null> {
-    return new Promise<ITimeFrame | null>((resolve, reject) => {
-      this.http
-        .get<{ message: string; timeFrame: ITimeFrame }>(
-          `http://localhost:3000/api/timeFrames/next?currentStartDate=${currentFrame.startDate.toISOString()}&currentEndDate=${currentFrame.endDate.toISOString()}`
-        )
-        .subscribe({
-          next: (response) => {
-            console.log('Fetched next time frame:', response);
-            const timeFrame = {
-              ...response.timeFrame,
-              startDate: new Date(response.timeFrame.startDate),
-              endDate: new Date(response.timeFrame.endDate),
-            };
-            this.timeFrames.update((old) => {
-              if (!old.find((item) => item.startDate.getFullYear() === timeFrame.startDate.getFullYear() && item.index === timeFrame.index)) {
-                return [...old, timeFrame];
-              }
-              return [...old];
-            });
-            resolve(timeFrame);
-          },
-          error: (error) => {
-            console.error('Error fetching next time frame:', error);
-            reject(error);
-          },
-        });
-    });
-  }
-
-  getPreviousTimeFrame(currentFrame: ITimeFrame): Promise<ITimeFrame | null> {
-    return new Promise<ITimeFrame | null>((resolve, reject) => {
-      this.http
-        .get<{ message: string; timeFrame: ITimeFrame }>(
-          `http://localhost:3000/api/timeFrames/previous?currentStartDate=${currentFrame.startDate.toISOString()}&currentEndDate=${currentFrame.endDate.toISOString()}`
-        )
-        .subscribe({
-          next: (response) => {
-            console.log('Fetched next time frame:', response);
-            const timeFrame = {
-              ...response.timeFrame,
-              startDate: new Date(response.timeFrame.startDate),
-              endDate: new Date(response.timeFrame.endDate),
-            };
-             this.timeFrames.update((old) => {
-              if (!old.find((item) => item.startDate.getFullYear() === timeFrame.startDate.getFullYear() && item.index === timeFrame.index)) {
-                return [...old, timeFrame];
-              }
-              return [...old];
-            });
-            resolve(timeFrame);
-          },
-          error: (error) => {
-            console.error('Error fetching next time frame:', error);
-            reject(error);
-          },
-        });
-    });
-  }
-
-  // async selectPreviousTimeFrame(): Promise<void> {
-  //   const previousTimeFrame = await this.getPreviousTimeFrame(this.selectedTimeFrame()!);
-  //   this.selectedTimeFrame.set(previousTimeFrame);
-  // }
 }
