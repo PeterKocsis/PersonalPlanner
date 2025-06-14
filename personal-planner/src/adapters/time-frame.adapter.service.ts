@@ -3,6 +3,7 @@ import { ITimeFrame } from '../app/interfaces/time-frame.interface';
 import { HttpClient } from '@angular/common/http';
 import { ITask } from '../app/interfaces/task.interface';
 import { TaskAdapterService } from './task.adapter.service';
+import { map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
@@ -12,17 +13,12 @@ export class TimeFrameAdapterService {
   taskService = inject(TaskAdapterService)
 
   timeFrames = signal<ITimeFrame[]>([]);
-  frameInProgress = signal<ITimeFrame | null>(null)
-  selectedTimeFrame = signal<ITimeFrame | null>(null);
+  // frameInProgress = signal<ITimeFrame | null>(null)
+  // selectedTimeFrame = signal<ITimeFrame | null>(null);
 
   constructor() {
     // Initialize frameInProgress asynchronously
-    this.getTimeFrames().then((frames) => {
-      if (frames && frames.length > 0) {
-        this.frameInProgress.set(frames[0]);
-        this.selectedTimeFrame.set(frames[0]);
-      }
-    });
+    this.getTimeFrames();
   }
 
   getTimeFrames(startDate?: Date, endDate?: Date): Promise<ITimeFrame[]> {
@@ -33,24 +29,29 @@ export class TimeFrameAdapterService {
         .get<{ message: string; timeFrames: ITimeFrame[] }>(
           `${baseUrl}${queryParams}`
         )
+        .pipe(
+          map((response)=>{
+            return  response.timeFrames.map((timeFrame) => ({
+                ...timeFrame,
+                startDate: new Date(timeFrame.startDate),
+                endDate: new Date(timeFrame.endDate),
+              }))
+          })
+        )
         .subscribe({
-          next: (response) => {
-            console.log('Fetched time frames:', response);
-            
-            this.timeFrames.set(
-              response.timeFrames.map((timeFrame) => ({
-                ...timeFrame,
-                startDate: new Date(timeFrame.startDate),
-                endDate: new Date(timeFrame.endDate),
-              }))
-            );
-            resolve(
-              response.timeFrames.map((timeFrame) => ({
-                ...timeFrame,
-                startDate: new Date(timeFrame.startDate),
-                endDate: new Date(timeFrame.endDate),
-              }))
-            );
+          next: (timeFrames) => {
+            console.log('Fetched time frames:', timeFrames);
+
+            this.timeFrames.update((previous)=>{
+              const mergedFrames: ITimeFrame[] = [...timeFrames];
+              previous.forEach((existingFrame) => {
+                if (!mergedFrames.find((frame) => frame.index === existingFrame.index && frame.year === existingFrame.year)) {
+                  mergedFrames.push(existingFrame);
+                }
+              });
+              return mergedFrames.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+            });
+            resolve(timeFrames);
           },
           error: (error) => {
             console.error('Error fetching time frames:', error);
@@ -75,11 +76,6 @@ export class TimeFrameAdapterService {
             //handle timeFrame update
             this.timeFrames.update(old=>old.map((timeFrame)=>timeFrame.index === index ? response.timeFrame : timeFrame));
 
-            //Update selectedTimeFrame if required
-            if (this.selectedTimeFrame()?.index === response.timeFrame.index) {
-              this.selectedTimeFrame.set(response.timeFrame);
-            }
-
             //Handle task update
             this.taskService.tasks$.next(
 
@@ -99,10 +95,10 @@ export class TimeFrameAdapterService {
     
   }
 
-  async selectNextTimeFrame(): Promise<void> {
-    const nextFrame = await this.getNextTimeFrame(this.selectedTimeFrame()!);
-    this.selectedTimeFrame.set(nextFrame);
-  }
+  // async selectNextTimeFrame(): Promise<void> {
+  //   const nextFrame = await this.getNextTimeFrame(this.selectedTimeFrame()!);
+  //   this.selectedTimeFrame.set(nextFrame);
+  // }
 
   getNextTimeFrame(currentFrame: ITimeFrame): Promise<ITimeFrame | null> {
     return new Promise<ITimeFrame | null>((resolve, reject) => {
@@ -164,8 +160,8 @@ export class TimeFrameAdapterService {
     });
   }
 
-  async selectPreviousTimeFrame(): Promise<void> {
-    const previousTimeFrame = await this.getPreviousTimeFrame(this.selectedTimeFrame()!);
-    this.selectedTimeFrame.set(previousTimeFrame);
-  }
+  // async selectPreviousTimeFrame(): Promise<void> {
+  //   const previousTimeFrame = await this.getPreviousTimeFrame(this.selectedTimeFrame()!);
+  //   this.selectedTimeFrame.set(previousTimeFrame);
+  // }
 }

@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { MonthSelectorComponent } from './month-selector.component';
+import { RangeSelectorComponent } from './range-selector.component';
 
-describe('MonthSelectorComponent', () => {
-  let component: MonthSelectorComponent;
-  let fixture: ComponentFixture<MonthSelectorComponent>;
+describe('RangeSelectorComponent', () => {
+  let component: RangeSelectorComponent;
+  let fixture: ComponentFixture<RangeSelectorComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [MonthSelectorComponent]
+      imports: [RangeSelectorComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(MonthSelectorComponent);
+    fixture = TestBed.createComponent(RangeSelectorComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

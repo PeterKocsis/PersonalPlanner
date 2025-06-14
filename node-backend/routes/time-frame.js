@@ -3,7 +3,7 @@ const router = express.Router();
 const Task = require('../models/task');
 const SchedulePocketModel = require('../models/schedulePocket');
 const daySchedule = require('../models/daySchedule');
-const { getTimeRangesFromDateRange, getNextTimeRange, getPrviousTimeRange, getTimeRangeByIndex } = require('../utilities/time-range-helper');
+const { getTimeRangesFromDateRange, getNextTimeRange, getPreviousTimeRange, getTimeRangeByIndex } = require('../utilities/time-range-helper');
 const { collectFrameData } = require('../utilities/time-frame-helper');
 const checkAuth = require('../middleware/check-auth');
 
@@ -62,7 +62,7 @@ router.get('/previous', checkAuth, async (req, res, next) => {
         const { currentStartDate, currentEndDate } = req.query;
         timeRange = getTimeRangesFromDateRange(currentStartDate, currentEndDate);
         
-        const previousTimeRange = getPrviousTimeRange(timeRange[0].startDate);
+        const previousTimeRange = getPreviousTimeRange(timeRange[0].startDate);
 
         const timeRangesWithPocketTasks2 = await collectFrameData([previousTimeRange], req.userData.userId);
 

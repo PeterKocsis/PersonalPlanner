@@ -4,7 +4,7 @@
         @if (tasksToDo().length > 0) {
         <div class="example-list">
             @for (task of tasksToDo(); track task._id) {
-            <app-task-list-item [task]="task"></app-task-list-item>
+            <app-task-list-item [task]="task" (assingTaskTotimeFrame)="onAssignTaskToTimeFrame($event)"></app-task-list-item>
 
             }
         </div>
@@ -25,24 +25,17 @@
         <h2 style="margin-top: 20px;">Finished tasks</h2>
         <div class="example-list">
             @for (task of tasksCompleted(); track task._id) {
-            <app-task-list-item [task]="task"></app-task-list-item>
+            <app-task-list-item [task]="task" (assingTaskTotimeFrame)="onAssignTaskToTimeFrame($event)"></app-task-list-item>
             }
         </div>
         }
     </div>
     <div style="display: flex; flex-direction: column;">
-        <div style="display: flex; width: 100%; align-items: center;">
-            <button mat-icon-button
-                (click)="timeFrameService.selectPreviousTimeFrame()">
-                <mat-icon>chevron_left</mat-icon>
-            </button>
-            <h2 style="margin: 0px;">Week {{timeFrameService.selectedTimeFrame()!.index}}</h2>
-            <button mat-icon-button
-                (click)="timeFrameService.selectNextTimeFrame()">
-                <mat-icon>chevron_right</mat-icon>
-            </button>
-        </div>
-        <app-time-frame-viewer style="height: 100%;"
-            [timeFrame]="timeFrameService.selectedTimeFrame()! "></app-time-frame-viewer>
+        <app-range-selector [timeUnit]="'week'" (selectionChanged)="onSelectedRangeChanged($event)"></app-range-selector>
+        @if (selectedTimeFrame()) {
+            <app-time-frame-viewer style="height: 100%;"
+                [timeFrame]="selectedTimeFrame()!"></app-time-frame-viewer>
+        }
     </div>
+
 </div>

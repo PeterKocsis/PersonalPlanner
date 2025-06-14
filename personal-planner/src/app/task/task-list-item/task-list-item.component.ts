@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,6 +27,7 @@ import { TimeFrameAdapterService } from '../../../adapters/time-frame.adapter.se
 })
 export class TaskListItemComponent {
   task = input.required<ITask>();
+  assingTaskTotimeFrame = output<string>();
   taskService = inject(TaskAdapterService);
   spaceServie = inject(SpacesService);
   taskEditorDialogService = inject(TaskEditorDialogService);
@@ -64,12 +65,6 @@ export class TaskListItemComponent {
   }
 
   onAssignTimeFrame() {
-    this.timeFrameAdapterService.addTaskToTimeFrame(
-      this.task()._id,
-      this.timeFrameAdapterService
-        .selectedTimeFrame()
-        ?.startDate.getFullYear() || new Date().getFullYear(),
-      this.timeFrameAdapterService.selectedTimeFrame()?.index || 0
-    );
+    this.assingTaskTotimeFrame.emit(this.task()._id);
   }
 }

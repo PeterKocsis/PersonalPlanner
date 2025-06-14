@@ -17,6 +17,7 @@ const getTimeRange = (date) => {
   const endDate = getTimeRangeEnd(date);
   const timeRangeIndex = getTimeRangeIndex(startDate);
   return {
+    year: date.getFullYear(),
     index: timeRangeIndex,
     startDate: new Date(startDate),
     endDate: new Date(endDate),
@@ -81,6 +82,7 @@ const getTimeRangeByIndex = (year, index) => {
     index: index,
     startDate: startDate,
     endDate: endDate,
+    year: year
   };
 };
 
@@ -109,6 +111,18 @@ const getTimeRangesFromDateRange = (startDate, endDate) => {
   return timeRanges;
 };
 
+const getMonthTimeRange = (date) => {
+  const startDate = new Date(date);
+  startDate.setDate(1); // Set to the first day of the month
+  const endDate = new Date(date);
+  endDate.setMonth(endDate.getMonth() + 1); // Move to the next month
+  endDate.setDate(0); // Set to the last day of the month
+  return {
+    startDate,
+    endDate,
+  };
+}
+
 const getNextTimeRange = (dateFromCurrentRange) => {
   const currentRange = getTimeRange(dateFromCurrentRange);
   timeFromNextFrame = new Date(currentRange.endDate);
@@ -117,7 +131,7 @@ const getNextTimeRange = (dateFromCurrentRange) => {
   return nextTimeFrame;
 };
 
-const getPrviousTimeRange = (dateFromCurrentRange) => {
+const getPreviousTimeRange = (dateFromCurrentRange) => {
   const timeRange = getTimeRange(dateFromCurrentRange);
   timeFromPreviousFrame = new Date(timeRange.startDate);
   timeFromPreviousFrame.setDate(
@@ -130,6 +144,8 @@ const getPrviousTimeRange = (dateFromCurrentRange) => {
 module.exports = {
   getTimeRangesFromDateRange,
   getNextTimeRange,
-  getPrviousTimeRange,
-  getTimeRangeByIndex
+  getPreviousTimeRange,
+  getTimeRangeByIndex,
+  getTimeRange,
+  getMonthTimeRange
 };

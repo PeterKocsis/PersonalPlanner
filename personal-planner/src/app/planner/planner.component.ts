@@ -7,10 +7,11 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatIconModule } from '@angular/material/icon';
 import { MatInputModule } from '@angular/material/input';
-import { MonthSelectorComponent } from '../month-selector/month-selector.component';
-import { ITimeFrame } from '../interfaces/time-frame.interface';
 import { TimeFrameViewerComponent } from '../time-frame-viewer/time-frame-viewer.component';
 import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.service';
+import { RangeSelectorComponent } from '../range-selector/range-selector.component';
+import { ITimeRange } from '../interfaces/time-range.interface';
+import { ITimeFrame } from '../interfaces/time-frame.interface';
 
 @Component({
   selector: 'app-planner',
@@ -23,8 +24,8 @@ import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.servi
     MatDatepickerModule,
     MatIconModule,
     CommonModule,
-    MonthSelectorComponent,
     TimeFrameViewerComponent,
+    RangeSelectorComponent
   ],
   templateUrl: './planner.component.html',
   styleUrl: './planner.component.scss',
@@ -32,9 +33,14 @@ import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.servi
 export class PlannerComponent {
   timeFrameService = inject(TimeFrameAdapterService);
   timeFrames = this.timeFrameService.timeFrames;
-  
-  onDateChanged(timeRange: {startDate: Date, endDate: Date}) {
-    this.timeFrameService.getTimeFrames(timeRange.startDate, timeRange.endDate);
+  selectedTimeFrames = signal<ITimeFrame[]>([]);
+
+
+  async onSelectedRangeChanged(selectedRanges: ITimeRange[]) {
+    const startDate = selectedRanges[0].startDate;
+    const endDate = selectedRanges[selectedRanges.length - 1].startDate;
+    const result = await this.timeFrameService.getTimeFrames(startDate, endDate);
+    this.selectedTimeFrames.set(result);
   }
 
 }

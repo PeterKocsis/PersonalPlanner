@@ -1,0 +1,31 @@
+<div style="display: flex; flex-direction: row; flex-wrap: wrap; gap: 1rem; align-items: center;">
+    <button mat-mini-fab color="primary" (click)="previous()">
+        <mat-icon>
+            chevron_left
+        </mat-icon>
+    </button>
+    @if (selectedRanges().length) {
+    <ng-container [ngTemplateOutlet]="timeUnit() === 'week' ? displayWeek : displayMonth"></ng-container>
+    }
+    <button mat-mini-fab color="primary" (click)="next()">
+        <mat-icon>
+            chevron_right
+        </mat-icon>
+    </button>
+    @if (!isCurrentTimeSelected()) {
+    <button mat-raised-button color="primary" (click)="resetSelectedDate()">Back to current {{timeUnit() === 'week' ? 'week' : 'month'}}</button>
+    }
+</div>
+
+<ng-template #displayWeek>
+    <mat-label
+        style="font-size: large; text-align: center; font-weight: 600; width: 10%; min-width: 100px; max-width: 200px;">Week
+        {{selectedRanges()[0].index}}</mat-label>
+
+</ng-template>
+
+<ng-template #displayMonth>
+    <mat-label
+        style="font-size: large; text-align: center; font-weight: 600; width: 10%; min-width: 100px; max-width: 200px;">{{selectedRanges()[0].endDate|
+        date: 'YYYY.MMMM'}}</mat-label>
+</ng-template>
