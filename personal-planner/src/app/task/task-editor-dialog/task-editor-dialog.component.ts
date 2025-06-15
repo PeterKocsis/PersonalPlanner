@@ -5,7 +5,7 @@ import {
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { FormsModule } from '@angular/forms';
+import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
@@ -30,6 +30,7 @@ import { ITimeFrame } from '../../interfaces/time-frame.interface';
     MatButtonToggleModule,
     TimeFrameViewerComponent,
     RangeSelectorComponent,
+    ReactiveFormsModule
   ],
   templateUrl: './task-editor-dialog.component.html',
   styleUrl: './task-editor-dialog.component.scss',
@@ -38,8 +39,27 @@ export class TaskEditorDialogComponent {
 
   taskeditorDialogService = inject(TaskEditorDialogService);
   timeFrameService = inject(TimeFrameAdapterService);
+  readonly dialogRef = inject(MatDialogRef<TaskEditorDialogComponent>);
+  readonly data = inject<{ task: ITask; spaceId: string | undefined }>(
+    MAT_DIALOG_DATA
+  );
+  readonly task = model(this.data.task);
 
   selectedTimeFrame = signal<ITimeFrame | undefined>(undefined);
+
+  form = new FormGroup({
+    title: new FormControl<string | undefined>(this.task().title, {
+      nonNullable: true,
+      validators: [Validators.required, Validators.minLength(3)],
+    }),
+    description: new FormControl<string | undefined>(this.task().description, {
+      nonNullable: true,}),
+    timeToFinish: new FormControl<string | undefined>(this.task().timeToCompleteMinutes?.toString(), {
+      nonNullable: true,}),
+    spaceId: new FormControl<string | undefined>(this.task().spaceId, {
+      nonNullable: true,}),
+    assignedTimeRange: new FormControl<string | undefined>(this.task().frameTasksToScheduleId),
+  });
   
   constructor() {
     effect(() => {
@@ -50,10 +70,7 @@ export class TaskEditorDialogComponent {
       }
     });
   }
-  
-  get selectedSpace() {
-    return computed(() => this.task().spaceId)();
-  }
+
   
   async onSelectionChanged($event: ITimeRange[]) {
     const startDate = $event[0].startDate;
@@ -64,39 +81,29 @@ export class TaskEditorDialogComponent {
     this.selectedTimeFrame.set(resultFrame);
   }
 
-  set selectedSpace(value: string | undefined) {
-    this.task.update((previous) => {
-      return { ...previous, spaceId: value! };
-    });
-  }
-
   onCancel() {
     this.dialogRef.close();
   }
 
-  get timeToFinish(): string | undefined {
-    return computed(() => this.task().timeToCompleteMinutes)()?.toString();
-  }
-
-  set timeToFinish(value: string | undefined) {
-    const timeToFinish = value ? parseInt(value) : undefined;
-    this.task.update((previous) => {
-      return { ...previous, timeToCompleteMinutes: timeToFinish };
-    });
-  }
-
   async onAccept() {
+    if (this.form.invalid) {
+      return;
+    }
     try {
+      this.task.update((previous) => {
+        return {
+          ...previous,
+          title: this.form.value.title,
+          description: this.form.value.description,
+          timeToCompleteMinutes: this.form.value.timeToFinish ? parseInt(this.form.value.timeToFinish) : undefined,
+          spaceId: this.form.value.spaceId,
+        };
+      });
+
       this.taskeditorDialogService.saveTask(this.task());
       this.dialogRef.close();
     } catch (error) {
       console.error('Failed to update task:', error);
     }
   }
-
-  readonly dialogRef = inject(MatDialogRef<TaskEditorDialogComponent>);
-  readonly data = inject<{ task: ITask; spaceId: string | undefined }>(
-    MAT_DIALOG_DATA
-  );
-  readonly task = model(this.data.task);
 }
