@@ -1,25 +1,25 @@
 <h2 mat-dialog-title>Edit Task</h2>
-    <mat-dialog-content style="display: flex; flex-direction: row; flex: 1; gap: 1rem">
-        <form style="display: flex; flex-direction: column; flex: 1;" [formGroup]="form">
-            <mat-form-field>
-                <mat-label>Title</mat-label>
-                <input matInput form formControlName="title"/>
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>Description</mat-label>
-                <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
-                    cdkAutosizeMaxRows="5" formControlName="description" name=""
-                    id=""></textarea>
-            </mat-form-field>
-            <mat-form-field>
-                <mat-label>Assigned Space</mat-label>
-                <mat-select formControlName="spaceId">
-                    @for (space of taskeditorDialogService.spaces(); track space?._id) {
-                    <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
-                    }
-                </mat-select>
-            </mat-form-field>
-            <mat-label>Estimated complation time</mat-label>
+<mat-dialog-content style="display: flex; flex-direction: row; flex: 1; gap: 1rem">
+    <form style="display: flex; flex-direction: column; flex: 1; gap: 0.5rem;" [formGroup]="form">
+        <mat-form-field>
+            <mat-label>Title</mat-label>
+            <input matInput form formControlName="title" />
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Description</mat-label>
+            <textarea matInput cdkTextareaAutosize #autosize="cdkTextareaAutosize" cdkAutosizeMinRows="1"
+                cdkAutosizeMaxRows="5" formControlName="description" name="" id=""></textarea>
+        </mat-form-field>
+        <mat-form-field>
+            <mat-label>Assigned Space</mat-label>
+            <mat-select formControlName="spaceId">
+                @for (space of taskeditorDialogService.spaces(); track space?._id) {
+                <mat-option [value]="space?._id!">{{space?.displayName}}</mat-option>
+                }
+            </mat-select>
+        </mat-form-field>
+        <div>
+            <mat-label style="margin: 0px;">Estimated complation time</mat-label>
             <mat-button-toggle-group formControlName="timeToFinish" name="estimatedDuration"
                 aria-label="Estimated Duration">
                 <mat-button-toggle value=5>5m</mat-button-toggle>
@@ -31,12 +31,26 @@
                 <mat-button-toggle value=480>8h</mat-button-toggle>
                 <mat-button-toggle value=960>8h+</mat-button-toggle>
             </mat-button-toggle-group>
+        </div>
+        <mat-form-field>
             <mat-label style="margin-top: 10px;">Assigned Week</mat-label>
+            <input matInput type="text" readonly formControlName="assignedTimeRange" />
+            @if (assignedTimeRange) {
+                <button matIconSuffix mat-raised-button color="accent" style="margin-right: 1rem;" (click)="onUnassignTimeRange()">Unassign</button>
+            } @else {
+                <button matIconSuffix mat-raised-button color="primary" style="margin-right: 1rem;" (click)="onOpenFrameBrowser()">Select in Frame Browser</button>
+            }
+        </mat-form-field>
+    </form>
+    @if (showTimaRangeSelector()) {
+        <div style="flex: 1;">
             <app-range-selector [timeUnit]="'week'"
                 (selectionChanged)="onSelectionChanged($event)"></app-range-selector>
-        </form>
-        <app-time-frame-viewer style="flex: 1;" [timeFrame]="selectedTimeFrame()!"></app-time-frame-viewer>
-    </mat-dialog-content>
+            <app-time-frame-viewer [timeFrame]="selectedTimeFrame()!"></app-time-frame-viewer>
+        </div>
+
+    }
+</mat-dialog-content>
 <mat-dialog-actions align="end">
     <button mat-raised-button (click)="onCancel()">Cancel</button>
     <button mat-raised-button color="primary" [disabled]="form.invalid" (click)="onAccept()" cdkFocusInitial>Ok</button>

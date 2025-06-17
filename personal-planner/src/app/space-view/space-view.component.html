@@ -1,6 +1,6 @@
 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; height: 90%;">
-    <div style="display: flex; flex-direction: column;">
-        <h2>To Do</h2>
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
+        <h2 style="margin: 0px; height: 40px;">To Do</h2>
         @if (tasksToDo().length > 0) {
         <div class="example-list">
             @for (task of tasksToDo(); track task._id) {
@@ -30,10 +30,10 @@
         </div>
         }
     </div>
-    <div style="display: flex; flex-direction: column;">
+    <div style="display: flex; flex-direction: column; gap: 1rem;">
         <app-range-selector [timeUnit]="'week'" (selectionChanged)="onSelectedRangeChanged($event)"></app-range-selector>
         @if (selectedTimeFrame()) {
-            <app-time-frame-viewer style="height: 100%;"
+            <app-time-frame-viewer style="height: 100%; border: solid 1px #ccc; border-radius: 4px;"
                 [timeFrame]="selectedTimeFrame()!"></app-time-frame-viewer>
         }
     </div>

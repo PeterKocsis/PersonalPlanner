@@ -1,11 +1,24 @@
-import { Component, computed, effect, inject, model, signal } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  model,
+  signal,
+} from '@angular/core';
 import { ITask } from '../../interfaces/task.interface';
 import {
   MAT_DIALOG_DATA,
   MatDialogModule,
   MatDialogRef,
 } from '@angular/material/dialog';
-import { FormControl, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
+import {
+  FormControl,
+  FormGroup,
+  FormsModule,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSelectModule } from '@angular/material/select';
@@ -17,6 +30,7 @@ import { RangeSelectorComponent } from '../../range-selector/range-selector.comp
 import { ITimeRange } from '../../interfaces/time-range.interface';
 import { TimeFrameAdapterService } from '../../../adapters/time-frame.adapter.service';
 import { ITimeFrame } from '../../interfaces/time-frame.interface';
+import { last } from 'rxjs';
 
 @Component({
   selector: 'app-task-editor-dialog',
@@ -30,13 +44,13 @@ import { ITimeFrame } from '../../interfaces/time-frame.interface';
     MatButtonToggleModule,
     TimeFrameViewerComponent,
     RangeSelectorComponent,
-    ReactiveFormsModule
+    ReactiveFormsModule,
   ],
   templateUrl: './task-editor-dialog.component.html',
   styleUrl: './task-editor-dialog.component.scss',
 })
 export class TaskEditorDialogComponent {
-
+  
   taskeditorDialogService = inject(TaskEditorDialogService);
   timeFrameService = inject(TimeFrameAdapterService);
   readonly dialogRef = inject(MatDialogRef<TaskEditorDialogComponent>);
@@ -44,21 +58,29 @@ export class TaskEditorDialogComponent {
     MAT_DIALOG_DATA
   );
   readonly task = model(this.data.task);
-
+  
   selectedTimeFrame = signal<ITimeFrame | undefined>(undefined);
-
+  
   form = new FormGroup({
     title: new FormControl<string | undefined>(this.task().title, {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(3)],
     }),
     description: new FormControl<string | undefined>(this.task().description, {
-      nonNullable: true,}),
-    timeToFinish: new FormControl<string | undefined>(this.task().timeToCompleteMinutes?.toString(), {
-      nonNullable: true,}),
+      nonNullable: true,
+    }),
+    timeToFinish: new FormControl<string | undefined>(
+      this.task().timeToCompleteMinutes?.toString(),
+      {
+        nonNullable: true,
+      }
+    ),
     spaceId: new FormControl<string | undefined>(this.task().spaceId, {
-      nonNullable: true,}),
-    assignedTimeRange: new FormControl<string | undefined>(this.task().frameTasksToScheduleId),
+      nonNullable: true,
+    }),
+    assignedTimeRange: new FormControl<string | undefined>(
+      this.task().frameTasksToScheduleId
+    ),
   });
   
   constructor() {
@@ -70,11 +92,29 @@ export class TaskEditorDialogComponent {
       }
     });
   }
-
   
-  async onSelectionChanged($event: ITimeRange[]) {
-    const startDate = $event[0].startDate;
-    const endDate = $event[$event.length - 1].startDate;
+  onOpenFrameBrowser() {
+    this.showTimaRangeSelector.set(true);
+    this.dialogRef.updateSize('1200px');
+  }
+
+  onUnassignTimeRange() {
+    this.form.get('assignedTimeRange')?.setValue(undefined);
+    this.showTimaRangeSelector.set(false);
+    this.dialogRef.updateSize('600px');
+  }
+
+  get assignedTimeRange() {
+    return this.form.get('assignedTimeRange')?.value;
+  }
+
+  showTimaRangeSelector = signal<boolean>(false);
+
+
+  async onSelectionChanged(ranges: ITimeRange[]) {
+    this.form.get('assignedTimeRange')?.setValue(ranges.length > 0 ? `${ranges[0].year}.${ranges[0].index}` : undefined);
+    const startDate = ranges[0].startDate;
+    const endDate = ranges[ranges.length - 1].startDate;
     const resultFrame = (
       await this.timeFrameService.getTimeFrames(startDate, endDate)
     )[0];
@@ -95,7 +135,9 @@ export class TaskEditorDialogComponent {
           ...previous,
           title: this.form.value.title,
           description: this.form.value.description,
-          timeToCompleteMinutes: this.form.value.timeToFinish ? parseInt(this.form.value.timeToFinish) : undefined,
+          timeToCompleteMinutes: this.form.value.timeToFinish
+            ? parseInt(this.form.value.timeToFinish)
+            : undefined,
           spaceId: this.form.value.spaceId,
         };
       });

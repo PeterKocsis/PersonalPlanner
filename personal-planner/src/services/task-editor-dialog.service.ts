@@ -74,7 +74,7 @@ export class TaskEditorDialogService {
     } else {
       const dialogRef = this.dialog.open(TaskEditorDialogComponent, {
         data: { task: this._tempTask, spaceId: this._tempTask.spaceId },
-        width: '1200px',
+        width: '600px',
       });
       dialogRef.beforeClosed().subscribe(result => {
         if (result) {
@@ -92,7 +92,7 @@ export class TaskEditorDialogService {
     this._tempTask = undefined;
     this.dialog.open(TaskEditorDialogComponent, {
       data: { task: task, spaceId: task.spaceId },
-      width: '1200px',
+      width: '600px',
     });
   }
 }
