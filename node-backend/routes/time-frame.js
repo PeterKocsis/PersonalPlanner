@@ -139,7 +139,7 @@ router.post('/:year/:index', checkAuth, async (req, res, next) => {
         if (!task) {
             throw new Error('Task not found');
         }
-        task.frameTasksToScheduleId = frameTasksToSchedule._id;
+        task.taskPocketRangeId = `${frameTasksToSchedule.year}.${frameTasksToSchedule.index}`;
         await task.save({ session });
 
         // Get all task within the frameTasksToSchedule

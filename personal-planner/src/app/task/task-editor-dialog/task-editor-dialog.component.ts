@@ -79,7 +79,7 @@ export class TaskEditorDialogComponent {
       nonNullable: true,
     }),
     assignedTimeRange: new FormControl<string | undefined>(
-      this.task().frameTasksToScheduleId
+      this.task().taskPocketRangeId
     ),
   });
   

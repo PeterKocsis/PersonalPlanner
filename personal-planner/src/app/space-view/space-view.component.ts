@@ -59,7 +59,7 @@ export class SpaceViewComponent {
         (task: ITask) =>
           task.spaceId === this.spaceId() &&
           task.completed === false &&
-          !task.frameTasksToScheduleId
+          !task.taskPocketRangeId
       );
   });
 

@@ -32,4 +32,26 @@ const collectFrameData = async(timeRanges, userId)=> {
     }));
 }
 
-module.exports = { collectFrameData };
+const addTaskToPocket = async (task, session, userId) => {
+    const pocket = await SchedulePocketModel.findOne({
+        ownerId: userId,
+        year: timeRange.year,
+        index: timeRange.index
+    });
+    //No pocket found create a new one 
+    if (!pocket) {
+        const newPocket = new SchedulePocketModel({
+            ownerId: userId,
+            year: timeRange.year,
+            index: timeRange.index,
+            taskIds: [taskId]
+        });
+        await newPocket.save();
+    } else {
+        // Pocket found, add the task to the existing pocket
+        pocket.taskIds.push(taskId);
+        await pocket.save();
+    }
+}
+
+module.exports = { collectFrameData, addTaskToPocket };

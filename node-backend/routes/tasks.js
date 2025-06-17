@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const Task = require('../models/task');
 const checkAuth = require('../middleware/check-auth');
+const {addTaskToPocket} = require('../utilities/time-frame-helper');
 
 router.get('', checkAuth, (req, res, next) => {
     Task.find()
@@ -19,32 +20,21 @@ router.get('', checkAuth, (req, res, next) => {
         });
 })
 
-router.post('', checkAuth, (req, res, next) => {
+router.post('', checkAuth, async (req, res, next) => {
     const task = req.body;
-    // if (!task.title || !task.description || !task.spaceId || task.timeToCompleteMinutes === undefined) {
-    //     return res.status(400).json({
-    //         message: 'Missing required fields: title, description, spaceId, or timeToCompleteMinutes'
-    //     });
-    // }
-    // if (typeof task.completed !== 'boolean') {
-    //     return res.status(400).json({
-    //         message: 'Invalid value for completed field, it should be a boolean'
-    //     });
-    // }
-    // if (task.timeToCompleteMinutes < 0) {
-    //     return res.status(400).json({
-    //         message: 'timeToCompleteMinutes cannot be negative'
-    //     });
-    // }
-    // if (task.frameTasksToScheduleId && typeof task.frameTasksToScheduleId !== 'string') {
-    //     return res.status(400).json({
-    //         message: 'frameTasksToScheduleId must be a string if provided'
-    //     });
-    // }
-    // if (task.scheduledDayId && typeof task.scheduledDayId !== 'string') {
-    //     return res.status(400).json({
-    //         message: 'scheduledDayId must be a string if provided'
-    //     });
+
+    //Make a new mongoose sesssion
+    // const session = await mongoose.startSession();
+    // session.startTransaction();
+    // try {
+    //     //Check if task is in pocket
+    //     if (task.taskPocketRangeId) {
+    //         console.log('Task is in pocket, adding to pocket');
+    //         await addTaskToPocket(task, session);
+    //     }
+
+    // } catch (error) {
+
     // }
 
     console.log('Received task:', task);
@@ -55,7 +45,7 @@ router.post('', checkAuth, (req, res, next) => {
         timeToCompleteMinutes: task.timeToCompleteMinutes,
         completed: task.completed,
         ownerId: req.userData.userId,
-        frameTasksToScheduleId: task.frameTasksToScheduleId || null,
+        taskPocketRangeId: task.taskPocketRangeId,
         scheduledDayId: task.scheduledDayId || undefined});
 
     
@@ -97,7 +87,7 @@ router.put('/:id', checkAuth, async (req, res, next)=> {
     try {
         const updatedTask = await Task
             .findOne({_id: req.params.id})
-            .updateOne({ spaceId: task.spaceId, title: task.title, description: task.description, timeToCompleteMinutes: task.timeToCompleteMinutes, completed: task.completed, frameTasksToScheduleId: task.frameTasksToScheduleId || null });
+            .updateOne({ spaceId: task.spaceId, title: task.title, description: task.description, timeToCompleteMinutes: task.timeToCompleteMinutes, completed: task.completed, taskPocketRangeId: task.taskPocketRangeId || null });
         console.log(`Task updated ${updatedTask}`);
         console.log(updatedTask)
         res.status(200).json(

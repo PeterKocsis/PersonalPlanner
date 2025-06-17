@@ -5,6 +5,6 @@ export interface ITask {
   createdAt: Date;
   spaceId?: string;
   timeToCompleteMinutes?: number;
-  frameTasksToScheduleId?: string;
+  taskPocketRangeId?: string;
   completed: boolean;
 }
