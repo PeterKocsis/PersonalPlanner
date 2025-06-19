@@ -50,39 +50,47 @@ import { last } from 'rxjs';
   styleUrl: './task-editor-dialog.component.scss',
 })
 export class TaskEditorDialogComponent {
-  
   taskeditorDialogService = inject(TaskEditorDialogService);
   timeFrameService = inject(TimeFrameAdapterService);
   readonly dialogRef = inject(MatDialogRef<TaskEditorDialogComponent>);
   readonly data = inject<{ task: ITask; spaceId: string | undefined }>(
     MAT_DIALOG_DATA
   );
-  readonly task = model(this.data.task);
-  
+
   selectedTimeFrame = signal<ITimeFrame | undefined>(undefined);
-  
+
   form = new FormGroup({
-    title: new FormControl<string | undefined>(this.task().title, {
+    title: new FormControl<string | undefined>(this.data.task.title, {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(3)],
     }),
-    description: new FormControl<string | undefined>(this.task().description, {
-      nonNullable: true,
-    }),
-    timeToFinish: new FormControl<string | undefined>(
-      this.task().timeToCompleteMinutes?.toString(),
+    description: new FormControl<string | undefined>(
+      this.data.task.description,
       {
         nonNullable: true,
       }
     ),
-    spaceId: new FormControl<string | undefined>(this.task().spaceId, {
+    timeToFinish: new FormControl<string | undefined>(
+      this.data.task.timeToCompleteMinutes?.toString(),
+      {
+        nonNullable: true,
+      }
+    ),
+    spaceId: new FormControl<string | undefined>(this.data.task.spaceId, {
       nonNullable: true,
     }),
-    assignedTimeRange: new FormControl<string | undefined>(
-      this.task().taskPocketRangeId
+    assignedTimeRange: new FormControl<ITimeRange | undefined>(
+      this.data.task.assignedTimeRange,
+      { nonNullable: true }
     ),
   });
-  
+
+  get displayedAssignedTimeRange(): string {
+    return this.form.controls.assignedTimeRange.value
+      ? `${this.form.controls.assignedTimeRange.value?.year}.${this.form.controls.assignedTimeRange.value?.index}`
+      : '';
+  }
+
   constructor() {
     effect(() => {
       if (this.selectedTimeFrame() === undefined) {
@@ -92,7 +100,7 @@ export class TaskEditorDialogComponent {
       }
     });
   }
-  
+
   onOpenFrameBrowser() {
     this.showTimaRangeSelector.set(true);
     this.dialogRef.updateSize('1200px');
@@ -110,9 +118,8 @@ export class TaskEditorDialogComponent {
 
   showTimaRangeSelector = signal<boolean>(false);
 
-
   async onSelectionChanged(ranges: ITimeRange[]) {
-    this.form.get('assignedTimeRange')?.setValue(ranges.length > 0 ? `${ranges[0].year}.${ranges[0].index}` : undefined);
+    this.form.get('assignedTimeRange')?.setValue(ranges?.[0]);
     const startDate = ranges[0].startDate;
     const endDate = ranges[ranges.length - 1].startDate;
     const resultFrame = (
@@ -130,19 +137,20 @@ export class TaskEditorDialogComponent {
       return;
     }
     try {
-      this.task.update((previous) => {
-        return {
-          ...previous,
-          title: this.form.value.title,
-          description: this.form.value.description,
-          timeToCompleteMinutes: this.form.value.timeToFinish
-            ? parseInt(this.form.value.timeToFinish)
-            : undefined,
-          spaceId: this.form.value.spaceId,
-        };
-      });
+      const editedTask: ITask = {
+        _id: this.data.task._id,
+        title: this.form.controls.title.value!,
+        description: this.form.controls.description.value,
+        timeToCompleteMinutes: this.form.controls.timeToFinish.value
+          ? parseInt(this.form.controls.timeToFinish.value!, 10)
+          : undefined,
+        spaceId: this.form.controls.spaceId.value,
+        assignedTimeRange: this.form.controls.assignedTimeRange.value,
+        createdAt: this.data.task.createdAt,
+        completed: this.data.task.completed,
+      };
 
-      this.taskeditorDialogService.saveTask(this.task());
+      this.taskeditorDialogService.saveTask(editedTask);
       this.dialogRef.close();
     } catch (error) {
       console.error('Failed to update task:', error);

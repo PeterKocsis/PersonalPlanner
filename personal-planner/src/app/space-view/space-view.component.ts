@@ -59,7 +59,7 @@ export class SpaceViewComponent {
         (task: ITask) =>
           task.spaceId === this.spaceId() &&
           task.completed === false &&
-          !task.taskPocketRangeId
+          !task.assignedTimeRange
       );
   });
 
@@ -108,9 +108,13 @@ export class SpaceViewComponent {
         selectedFrame.year,
         selectedFrame.index
       );
-      const updatedFrame = this.timeFrameService.timeFrames().find(
-        (frame) =>
-          frame.year === selectedFrame.year && frame.index === selectedFrame.index)
+      const updatedFrame = this.timeFrameService
+        .timeFrames()
+        .find(
+          (frame) =>
+            frame.year === selectedFrame.year &&
+            frame.index === selectedFrame.index
+        );
       this.selectedTimeFrame.set(updatedFrame);
     }
   }

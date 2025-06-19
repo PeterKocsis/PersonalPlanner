@@ -1,3 +1,5 @@
+import { ITimeRange } from "./time-range.interface";
+
 export interface ITask {
   _id: string;
   title?: string;
@@ -5,6 +7,6 @@ export interface ITask {
   createdAt: Date;
   spaceId?: string;
   timeToCompleteMinutes?: number;
-  taskPocketRangeId?: string;
+  assignedTimeRange?: ITimeRange;
   completed: boolean;
 }

@@ -8,7 +8,7 @@ const taskShema = mongoose.Schema({
     completed: { type: Boolean, default: false },
     timeToCompleteMinutes: { type: Number, default: 0 },
     scheduledDayId: { type: mongoose.Schema.Types.ObjectId, ref: 'DaySchedule', default: null },
-    taskPocketRangeId: { type: String, default: undefined },
+    assignedTimeRange: { type: Object, default: undefined },
     ownerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 });
 

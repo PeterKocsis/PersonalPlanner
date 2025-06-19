@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import { BehaviorSubject, firstValueFrom, take } from 'rxjs';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { AuthService } from '../app/auth/auth.service';
+import { ITimeFrame } from '../app/interfaces/time-frame.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -74,7 +75,7 @@ export class TaskAdapterService {
   addTask(task: ITask): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.http
-        .post<{ message: string; task: ITask }>(
+        .post<{ message: string; task: ITask, modifiedFrame: ITimeFrame }>(
           `http://localhost:3000/api/tasks`,
           task
         )

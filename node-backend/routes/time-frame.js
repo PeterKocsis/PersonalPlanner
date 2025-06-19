@@ -4,7 +4,7 @@ const Task = require('../models/task');
 const SchedulePocketModel = require('../models/schedulePocket');
 const daySchedule = require('../models/daySchedule');
 const { getTimeRangesFromDateRange, getNextTimeRange, getPreviousTimeRange, getTimeRangeByIndex } = require('../utilities/time-range-helper');
-const { collectFrameData } = require('../utilities/time-frame-helper');
+const { collectFrameListData } = require('../utilities/time-frame-helper');
 const checkAuth = require('../middleware/check-auth');
 
 
@@ -19,7 +19,7 @@ router.get('', checkAuth, async (req, res, next) => {
 
         //Fetch pockets for date rage
         console.log('Fetched time ranges:', timeRanges);
-        const timeRangesWithPocketTasks2 = await collectFrameData(timeRanges, req.userData.userId);
+        const timeRangesWithPocketTasks2 = await collectFrameListData(timeRanges, req.userData.userId);
 
         console.log('Time frames:', timeRangesWithPocketTasks2);
         res.status(200).json({
@@ -42,7 +42,7 @@ router.get('/next', checkAuth, async (req, res, next) => {
         
         // Fetch the next time frame
         const nextTimeRange = getNextTimeRange(timeRange[0].endDate);
-        const timeRangesWithPocketTasks2 = await collectFrameData([nextTimeRange], req.userData.userId);
+        const timeRangesWithPocketTasks2 = await collectFrameListData([nextTimeRange], req.userData.userId);
 
         console.log('Time frames:', timeRangesWithPocketTasks2);
         res.status(200).json({
@@ -64,7 +64,7 @@ router.get('/previous', checkAuth, async (req, res, next) => {
         
         const previousTimeRange = getPreviousTimeRange(timeRange[0].startDate);
 
-        const timeRangesWithPocketTasks2 = await collectFrameData([previousTimeRange], req.userData.userId);
+        const timeRangesWithPocketTasks2 = await collectFrameListData([previousTimeRange], req.userData.userId);
 
         console.log('Time frames:', timeRangesWithPocketTasks2);
         res.status(200).json({
@@ -139,7 +139,7 @@ router.post('/:year/:index', checkAuth, async (req, res, next) => {
         if (!task) {
             throw new Error('Task not found');
         }
-        task.taskPocketRangeId = `${frameTasksToSchedule.year}.${frameTasksToSchedule.index}`;
+        task.assignedTimeRange = `${frameTasksToSchedule.year}.${frameTasksToSchedule.index}`;
         await task.save({ session });
 
         // Get all task within the frameTasksToSchedule

@@ -34,7 +34,7 @@
         </div>
         <mat-form-field>
             <mat-label style="margin-top: 10px;">Assigned Week</mat-label>
-            <input matInput type="text" readonly formControlName="assignedTimeRange" />
+            <input matInput type="text" readonly [value]="displayedAssignedTimeRange" />
             @if (assignedTimeRange) {
                 <button matIconSuffix mat-raised-button color="accent" style="margin-right: 1rem;" (click)="onUnassignTimeRange()">Unassign</button>
             } @else {
