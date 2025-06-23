@@ -11,49 +11,51 @@ export class TimeFrameAdapterService {
   http = inject(HttpClient);
   timeFrames$ = new BehaviorSubject<ITimeFrame[]>([]);
 
-  constructor() {
-    // Initialize frameInProgress asynchronously
-    this.getTimeFrames();
-  }
+  getTimeFrames(startDate?: Date, endDate?: Date): void {
+    const baseUrl = 'http://localhost:3000/api/timeFrames';
+    const queryParams =
+      startDate && endDate
+        ? `?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}`
+        : '';
+    this.http
+      .get<{ message: string; timeFrames: ITimeFrame[] }>(
+        `${baseUrl}${queryParams}`
+      )
+      .pipe(
+        map((response) => {
+          return response.timeFrames.map((timeFrame) => ({
+            ...timeFrame,
+            startDate: new Date(timeFrame.startDate),
+            endDate: new Date(timeFrame.endDate),
+          }));
+        })
+      )
+      .subscribe({
+        next: (timeFrames) => {
+          console.log('Fetched time frames:', timeFrames);
+          const previous = this.timeFrames$.value;
+          const mergedFrames: ITimeFrame[] = [...timeFrames];
+          previous.forEach((existingFrame) => {
+            if (
+              !mergedFrames.find(
+                (frame) =>
+                  frame.index === existingFrame.index &&
+                  frame.year === existingFrame.year
+              )
+            ) {
+              mergedFrames.push(existingFrame);
+            }
+          });
+          mergedFrames.sort(
+            (a, b) => a.startDate.getTime() - b.startDate.getTime()
+          );
 
-  getTimeFrames(startDate?: Date, endDate?: Date): Promise<ITimeFrame[]> {
-    return new Promise<ITimeFrame[]>((resolve, reject) => {
-      const baseUrl = 'http://localhost:3000/api/timeFrames';
-      const queryParams = startDate && endDate ? `?startDate=${startDate.toISOString()}&endDate=${endDate.toISOString()}` : '';
-      this.http
-        .get<{ message: string; timeFrames: ITimeFrame[] }>(
-          `${baseUrl}${queryParams}`
-        )
-        .pipe(
-          map((response)=>{
-            return  response.timeFrames.map((timeFrame) => ({
-                ...timeFrame,
-                startDate: new Date(timeFrame.startDate),
-                endDate: new Date(timeFrame.endDate),
-              }))
-          })
-        )
-        .subscribe({
-          next: (timeFrames) => {
-            console.log('Fetched time frames:', timeFrames);
-            const previous = this.timeFrames$.value;
-            const mergedFrames: ITimeFrame[] = [...timeFrames];
-            previous.forEach((existingFrame) => {
-              if (!mergedFrames.find((frame) => frame.index === existingFrame.index && frame.year === existingFrame.year)) {
-                mergedFrames.push(existingFrame);
-              }
-            });
-            mergedFrames.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
-
-            this.timeFrames$.next(mergedFrames);
-            resolve(mergedFrames);
-          },
-          error: (error) => {
-            console.error('Error fetching time frames:', error);
-            reject(error);
-          },
-        });
-    });
+          this.timeFrames$.next(mergedFrames);
+        },
+        error: (error) => {
+          console.error('Error fetching time frames:', error);
+        },
+      });
   }
 
   getFrameByRange(range: ITimeRange): void {
@@ -69,8 +71,12 @@ export class TimeFrameAdapterService {
       return;
     }
 
-    const startDate = new Date(Math.min(...ranges.map((r) => r.startDate.getTime())));
-    const endDate = new Date(Math.max(...ranges.map((r) => r.endDate.getTime())));
+    const startDate = new Date(
+      Math.min(...ranges.map((r) => r.startDate.getTime()))
+    );
+    const endDate = new Date(
+      Math.max(...ranges.map((r) => r.endDate.getTime()))
+    );
 
     this.getTimeFrames(startDate, endDate);
   }
