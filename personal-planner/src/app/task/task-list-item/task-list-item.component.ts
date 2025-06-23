@@ -6,11 +6,10 @@ import { ITask } from '../../interfaces/task.interface';
 import { TaskAdapterService } from '../../../adapters/task.adapter.service';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
-import { SpacesService } from '../../../adapters/spaces.service';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
-import { TaskEditorDialogComponent } from '../task-editor-dialog/task-editor-dialog.component';
 import { TaskEditorDialogService } from '../../../services/task-editor-dialog.service';
 import { TimeFrameAdapterService } from '../../../adapters/time-frame.adapter.service';
+import { AppStateService } from '../../../services/app-state.service';
 
 @Component({
   selector: 'app-task-list-item',
@@ -29,14 +28,14 @@ export class TaskListItemComponent {
   task = input.required<ITask>();
   assingTaskTotimeFrame = output<string>();
   taskService = inject(TaskAdapterService);
-  spaceServie = inject(SpacesService);
+  appStateService = inject(AppStateService);
   taskEditorDialogService = inject(TaskEditorDialogService);
   timeFrameAdapterService = inject(TimeFrameAdapterService);
   dialog = inject(MatDialog);
   itemHovered = false;
   spaces = computed(() => [
-    this.spaceServie.inboxSpace(),
-    ...this.spaceServie.spaces(),
+    this.appStateService.inboxSpace(),
+    ...this.appStateService.spaces(),
   ]);
 
   onMouseEnter() {

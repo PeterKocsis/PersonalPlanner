@@ -1,55 +1,54 @@
 import { HttpClient } from '@angular/common/http';
-import { effect, Injectable, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ISpace } from '../app/interfaces/space.interface';
-import { AuthService } from '../app/auth/auth.service';
+import { BehaviorSubject, map } from 'rxjs';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SpacesService {
-  public spaces = signal<ISpace[]>([]);
-  public inboxSpace = signal<ISpace | undefined>(undefined);
-  constructor(private http: HttpClient, private authService: AuthService) {
-    effect(async () => {
-      if (this.authService.userAuthenticated()) {
-        this.spaces.set(await this.getSpaces());
-        this.inboxSpace.set(await this.getInbox());
-      }
-    });
+  private http = inject(HttpClient);
+
+  public spaces$ = new BehaviorSubject<ISpace[]>([]);
+  public inboxSpace$ = new BehaviorSubject<ISpace | undefined>(undefined);
+
+  getInbox(): void {
+    this.http
+      .get<{ message: string; inboxSpace: ISpace }>(
+        'http://localhost:3000/api/spaces/inbox'
+      )
+      .pipe(
+        map((response) => {
+          if (!response.inboxSpace || !response.inboxSpace._id) {
+            throw new Error('Invalid inbox space data received');
+          }
+          return response.inboxSpace;
+        })
+      )
+      .subscribe({
+        next: (inbox) => {
+          this.inboxSpace$.next(inbox);
+        },
+        error: (error) => {
+          this.inboxSpace$.error(error);
+        },
+      });
   }
 
-  getInbox(): Promise<ISpace> {
-    return new Promise<ISpace>((resolve, reject) => {
-      this.http
-        .get<{ message: string; inboxSpace: ISpace }>(
-          'http://localhost:3000/api/spaces/inbox'
-        )
-        .subscribe({
-          next: (response) => {
-            resolve(response.inboxSpace);
-          },
-          error: (error) => {
-            reject(error);
-          },
-        });
-    });
-  }
-
-  private getSpaces(): Promise<ISpace[]> {
-    return new Promise<ISpace[]>((resolve, reject) => {
-      this.http
-        .get<{ spaces: ISpace[] }>('http://localhost:3000/api/spaces')
-        .subscribe({
-          next: (data) => {
-            console.log('Fetched spaces:', data.spaces);
-            resolve(data.spaces);
-          },
-          error: (error) => {
-            console.error(`Failed to fetch spaces with prio: ${error}`);
-            reject(error);
-          },
-        });
-    });
+  getSpaces(): void {
+    this.http
+      .get<{ spaces: ISpace[] }>('http://localhost:3000/api/spaces')
+      .pipe(map((response) => response.spaces))
+      .subscribe({
+        next: (spaces) => {
+          console.log('Fetched spaces:', spaces);
+          this.spaces$.next(spaces);
+        },
+        error: (error) => {
+          console.error(`Failed to fetch spaces with prio: ${error}`);
+          this.spaces$.error(error);
+        },
+      });
   }
 
   addSpace(spaceName: string) {
@@ -58,12 +57,14 @@ export class SpacesService {
         'http://localhost:3000/api/spaces',
         { displayName: spaceName }
       )
+      .pipe(map((response) => response.newSpace))
       .subscribe({
-        next: (data) => {
-          this.spaces.update((old) => [...old, data.newSpace]);
+        next: (newSpace) => {
+          const mergedSpaces = [...this.spaces$.value, newSpace];
+          this.spaces$.next(mergedSpaces);
         },
         error: (error) => {
-          console.error('Error creating space:', error);
+          this.spaces$.error(error);
         },
       });
   }
@@ -71,12 +72,13 @@ export class SpacesService {
   deleteSpace(id: string) {
     this.http.delete(`http://localhost:3000/api/spaces/${id}`).subscribe({
       next: (data) => {
-        this.spaces.update((previous) =>
-          previous.filter((space) => space._id !== id)
+        const updatedSpaces = this.spaces$.value.filter(
+          (space) => space._id !== id
         );
+        this.spaces$.next(updatedSpaces);
       },
       error: (error) => {
-        console.error('Error deleting space:', error);
+        this.spaces$.error(error);
       },
     });
   }
@@ -89,10 +91,10 @@ export class SpacesService {
       )
       .subscribe({
         next: (data) => {
-          this.spaces.set(spaces);
+          this.spaces$.next(spaces);
         },
         error: (error) => {
-          console.error('Error updating space priority:', error);
+          this.spaces$.error(error);
         },
       });
   }

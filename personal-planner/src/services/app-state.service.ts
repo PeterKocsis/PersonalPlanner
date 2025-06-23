@@ -1,20 +1,23 @@
-import { inject, Injectable, OnDestroy, signal } from '@angular/core';
+import { effect, inject, Injectable, OnDestroy, signal } from '@angular/core';
 import { ITimeFrame } from '../app/interfaces/time-frame.interface';
 import { TaskAdapterService } from '../adapters/task.adapter.service';
 import { SpacesService } from '../adapters/spaces.service';
-import { merge, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { TimeFrameAdapterService } from '../adapters/time-frame.adapter.service';
+import { AuthService } from '../app/auth/auth.service';
+import { ITask } from '../app/interfaces/task.interface';
+import { ISpace } from '../app/interfaces/space.interface';
 
 @Injectable({
   providedIn: 'root',
 })
 export class AppStateService implements OnDestroy {
-  tasks = signal<any[]>([]);
-  spaces = signal<any[]>([]);
-  timeRanges = signal<any[]>([]);
-  currentWeekRange = signal<any | null>(null);
+  tasks = signal<ITask[]>([]);
+  spaces = signal<ISpace[]>([]);
+  inboxSpace = signal<ISpace | undefined>(undefined);
   timeFrames = signal<ITimeFrame[]>([]);
 
+  private _authService = inject(AuthService);
   private _taskAdapterService = inject(TaskAdapterService);
   private _timeFrameAdapterService = inject(TimeFrameAdapterService);
   private _spacesService = inject(SpacesService);
@@ -38,23 +41,24 @@ export class AppStateService implements OnDestroy {
           }
       }),
 
-      // this._spacesService.spaces$.subscribe((spaces) => {
-      //   this.spaces.set(spaces);
-      // }),
+      this._spacesService.spaces$.subscribe((spaces) => {
+        this.spaces.set(spaces);
+      }),
+      this._spacesService.inboxSpace$.subscribe((inbox) => {
+        this.inboxSpace.set(inbox);
+      }),
 
       this._timeFrameAdapterService.timeFrames$.subscribe((timeFrames) => {
         this.timeFrames.set(timeFrames);
       })
     );
-
-    // Initialize current week range
-    const today = new Date();
-    const startOfWeek = new Date(
-      today.setDate(today.getDate() - today.getDay())
-    );
-    const endOfWeek = new Date(startOfWeek);
-    endOfWeek.setDate(endOfWeek.getDate() + 6);
-    this.currentWeekRange.set({ start: startOfWeek, end: endOfWeek });
+    //Fetch initial data on user authentication
+    effect(async () => {
+      if (this._authService.userAuthenticated()) {
+        this._spacesService.getSpaces();
+        this._spacesService.getInbox();
+      }
+    });
   }
 
   ngOnDestroy(): void {

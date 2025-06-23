@@ -11,6 +11,7 @@ import { FormsModule } from '@angular/forms';
 import { ISpace } from '../interfaces/space.interface';
 import { MatButton } from '@angular/material/button';
 import { SpaceItemComponent } from './space-item/space-item.component';
+import { AppStateService } from '../../services/app-state.service';
 
 @Component({
   selector: 'app-space-manager',
@@ -27,7 +28,8 @@ import { SpaceItemComponent } from './space-item/space-item.component';
 })
 export class SpaceManagerComponent {
   spaceService = inject(SpacesService);
-  spaces = this.spaceService.spaces;
+  appStateService = inject(AppStateService);
+  spaces = this.appStateService.spaces;
   newSpaceName: string = '';
 
   drop(event: any) {
