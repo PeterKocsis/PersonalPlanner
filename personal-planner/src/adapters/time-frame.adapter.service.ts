@@ -1,18 +1,15 @@
-import { inject, Injectable, Signal, signal } from '@angular/core';
+import { inject, Injectable } from '@angular/core';
 import { ITimeFrame } from '../app/interfaces/time-frame.interface';
 import { HttpClient } from '@angular/common/http';
-import { ITask } from '../app/interfaces/task.interface';
-import { TaskAdapterService } from './task.adapter.service';
-import { map } from 'rxjs';
+import { BehaviorSubject, map } from 'rxjs';
+import { ITimeRange } from '../app/interfaces/time-range.interface';
 
 @Injectable({
   providedIn: 'root',
 })
 export class TimeFrameAdapterService {
   http = inject(HttpClient);
-  taskService = inject(TaskAdapterService)
-
-  timeFrames = signal<ITimeFrame[]>([]);
+  timeFrames$ = new BehaviorSubject<ITimeFrame[]>([]);
 
   constructor() {
     // Initialize frameInProgress asynchronously
@@ -39,17 +36,17 @@ export class TimeFrameAdapterService {
         .subscribe({
           next: (timeFrames) => {
             console.log('Fetched time frames:', timeFrames);
-
-            this.timeFrames.update((previous)=>{
-              const mergedFrames: ITimeFrame[] = [...timeFrames];
-              previous.forEach((existingFrame) => {
-                if (!mergedFrames.find((frame) => frame.index === existingFrame.index && frame.year === existingFrame.year)) {
-                  mergedFrames.push(existingFrame);
-                }
-              });
-              return mergedFrames.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+            const previous = this.timeFrames$.value;
+            const mergedFrames: ITimeFrame[] = [...timeFrames];
+            previous.forEach((existingFrame) => {
+              if (!mergedFrames.find((frame) => frame.index === existingFrame.index && frame.year === existingFrame.year)) {
+                mergedFrames.push(existingFrame);
+              }
             });
-            resolve(timeFrames);
+            mergedFrames.sort((a, b) => a.startDate.getTime() - b.startDate.getTime());
+
+            this.timeFrames$.next(mergedFrames);
+            resolve(mergedFrames);
           },
           error: (error) => {
             console.error('Error fetching time frames:', error);
@@ -59,37 +56,22 @@ export class TimeFrameAdapterService {
     });
   }
 
-  addTaskToTimeFrame(_id: string, year: number, index: number) {
-    return new Promise<void>((resolve, reject) => {
-      this.http
-        .post<{ message: string, timeFrame: ITimeFrame, task: ITask }>(
-          `http://localhost:3000/api/timeFrames/${year}/${index}`,
-          { taskId: _id }
-        )
-        .subscribe({
-          next: (response) => {
-            console.log('Task added to time frame:', response);
-            response.timeFrame.startDate = new Date(response.timeFrame.startDate);
-            response.timeFrame.endDate = new Date(response.timeFrame.endDate);
-            //handle timeFrame update
-            this.timeFrames.update(old=>old.map((timeFrame)=>timeFrame.index === index ? response.timeFrame : timeFrame));
+  getFrameByRange(range: ITimeRange): void {
+    const startDate = range.startDate;
+    const endDate = range.endDate;
 
-            //Handle task update
-            this.taskService.tasks$.next(
+    this.getTimeFrames(startDate, endDate);
+  }
 
-              this.taskService.tasks$.value.map((task) => 
-                task._id === response.task._id ? response.task : task
-              )
-            );
+  getFramesByRanges(ranges: ITimeRange[]): void {
+    if (!ranges || ranges.length === 0) {
+      this.timeFrames$.next([]);
+      return;
+    }
 
-            resolve();
-          },
-          error: (error) => {
-            console.error('Error adding task to time frame:', error);
-            reject(error);
-          },
-        });
-    });
-    
+    const startDate = new Date(Math.min(...ranges.map((r) => r.startDate.getTime())));
+    const endDate = new Date(Math.max(...ranges.map((r) => r.endDate.getTime())));
+
+    this.getTimeFrames(startDate, endDate);
   }
 }

@@ -2,7 +2,6 @@ import { DragDropModule } from '@angular/cdk/drag-drop';
 import {
   Component,
   computed,
-  effect,
   inject,
   input,
   signal,
@@ -10,7 +9,6 @@ import {
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInput } from '@angular/material/input';
 import { SpacesService } from '../../adapters/spaces.service';
 import { TaskAdapterService } from '../../adapters/task.adapter.service';
 import { ITask } from '../interfaces/task.interface';
@@ -19,23 +17,21 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskEditorDialogService } from '../../services/task-editor-dialog.service';
 import { TimeFrameViewerComponent } from '../time-frame-viewer/time-frame-viewer.component';
-import { ITimeFrame } from '../interfaces/time-frame.interface';
 import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.service';
-import { AsyncPipe, CommonModule } from '@angular/common';
+import { CommonModule } from '@angular/common';
 import { RangeSelectorComponent } from '../range-selector/range-selector.component';
 import { ITimeRange } from '../interfaces/time-range.interface';
+import { AppStateService } from '../../services/app-state.service';
 
 @Component({
   selector: 'app-space-view',
   imports: [
     MatFormFieldModule,
     DragDropModule,
-    MatInput,
     FormsModule,
     MatButtonModule,
     TaskListItemComponent,
     CommonModule,
-    AsyncPipe,
     RangeSelectorComponent,
     MatIconModule,
     TimeFrameViewerComponent,
@@ -45,15 +41,27 @@ import { ITimeRange } from '../interfaces/time-range.interface';
 })
 export class SpaceViewComponent {
   taskService = inject(TaskAdapterService);
+  appStateService = inject(AppStateService);
   spacesService = inject(SpacesService);
   taskEditorDialogService = inject(TaskEditorDialogService);
   spaceId = input.required<string>();
   timeFrameService = inject(TimeFrameAdapterService);
-  selectedTimeFrame = signal<ITimeFrame | undefined>(undefined);
+  selectedTimeFrame = computed(() => {
+    if (this.selectedTimeRange() === undefined) {
+      return this.appStateService.timeFrames()[0] || undefined;
+    }
+    return this.appStateService
+      .timeFrames()
+      .find(
+        (frame) =>
+          frame.year === this.selectedTimeRange()?.year &&
+          frame.index === this.selectedTimeRange()?.index
+      );
+  });
   dialog = inject(MatDialog);
   today = new Date();
   tasksToDo = computed<ITask[]>(() => {
-    return this.taskService
+    return this.appStateService
       .tasks()
       .filter(
         (task: ITask) =>
@@ -63,18 +71,8 @@ export class SpaceViewComponent {
       );
   });
 
-  constructor() {
-    effect(() => {
-      if (this.selectedTimeFrame() === undefined) {
-        this.selectedTimeFrame.set(
-          this.timeFrameService.timeFrames()[0] || undefined
-        );
-      }
-    });
-  }
-
   tasksCompleted = computed<ITask[]>(() => {
-    return this.taskService
+    return this.appStateService
       .tasks()
       .filter(
         (task: ITask) =>
@@ -90,32 +88,21 @@ export class SpaceViewComponent {
   }
 
   onDrop(event: any) {}
+  private selectedTimeRange = signal<ITimeRange | undefined>(undefined);
 
-  async onSelectedRangeChanged($event: ITimeRange[]) {
-    const startDate = $event[0].startDate;
-    const endDate = $event[$event.length - 1].startDate;
-    const resultFrame = (
-      await this.timeFrameService.getTimeFrames(startDate, endDate)
-    )[0];
-    this.selectedTimeFrame.set(resultFrame);
+  async onSelectedRangeChanged(ranges: ITimeRange[]) {
+    this.selectedTimeRange.set(ranges[0]);
+    this.timeFrameService.getFramesByRanges(ranges)
   }
 
   async onAssignTaskToTimeFrame(taskId: string) {
     const selectedFrame = this.selectedTimeFrame();
     if (selectedFrame) {
-      await this.timeFrameService.addTaskToTimeFrame(
-        taskId,
-        selectedFrame.year,
-        selectedFrame.index
-      );
-      const updatedFrame = this.timeFrameService
-        .timeFrames()
-        .find(
-          (frame) =>
-            frame.year === selectedFrame.year &&
-            frame.index === selectedFrame.index
-        );
-      this.selectedTimeFrame.set(updatedFrame);
+      const targetTask = this.appStateService
+        .tasks()
+        .find((task) => task._id === taskId);
+      targetTask!.assignedTimeRange = this.selectedTimeRange();
+      this.taskService.updateTask(targetTask!);
     }
   }
 }

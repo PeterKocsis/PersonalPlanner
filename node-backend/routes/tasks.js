@@ -104,11 +104,11 @@ router.put("/:id", checkAuth, async (req, res, next) => {
     });
     // PocketRangeId has been assigned to the task
     if (!storedTask.assignedTimeRange && task.assignedTimeRange) {
-      addTaskToPocket(task, session, req.userData.userId);
+      await addTaskToPocket(task, session, req.userData.userId);
     }
     // PocketRangeId has been removed from the task
     if (storedTask.assignedTimeRange && !task.assignedTimeRange) {
-      removeTaskFromPocket(req.params.id, session, req.userData.userId);
+      await removeTaskFromPocket(req.params.id, session, req.userData.userId);
     }
     // PocketRangeId has changed from one to another
     if (
@@ -116,11 +116,11 @@ router.put("/:id", checkAuth, async (req, res, next) => {
       task.assignedTimeRange &&
       storedTask.assignedTimeRange !== task.assignedTimeRange
     ) {
-      removeTaskFromPocket(req.params.id, session, req.userData.userId);
-      addTaskToPocket(task, session, req.userData.userId);
+      await removeTaskFromPocket(req.params.id, session, req.userData.userId);
+      await addTaskToPocket(task, session, req.userData.userId);
     }
     // Update the task with the new values
-    storedTask
+    await storedTask
       .set({
         spaceId: task.spaceId,
         title: task.title,
@@ -132,7 +132,7 @@ router.put("/:id", checkAuth, async (req, res, next) => {
       })
       .save({ session });
     await session.commitTransaction();
-    session.endSession();
+    await session.endSession();
     console.log("Task updated successfully");
     res.status(200).json(storedTask);
   } catch (error) {

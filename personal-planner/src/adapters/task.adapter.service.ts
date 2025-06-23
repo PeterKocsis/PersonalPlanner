@@ -1,17 +1,22 @@
-import { effect, inject, Injectable, signal } from '@angular/core';
+import { effect, Injectable } from '@angular/core';
 import { ITask } from '../app/interfaces/task.interface';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, firstValueFrom, take } from 'rxjs';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { AuthService } from '../app/auth/auth.service';
 import { ITimeFrame } from '../app/interfaces/time-frame.interface';
+
+export type TaskEvent = 'taskAdded' | 'taskUpdated' | 'taskDeleted' | 'taskStateChanged' | 'taskAssignedToSpace';
+export interface ITaskEvent {
+  type: TaskEvent;
+  task: ITask;
+}
 
 @Injectable({
   providedIn: 'root',
 })
 export class TaskAdapterService {
   tasks$ = new BehaviorSubject<ITask[]>([]);
-  tasks = toSignal(this.tasks$, { initialValue: [] });
+  taskEvents$ = new Subject<ITaskEvent>();
 
   updateTask(task: ITask): Promise<void> {
     return new Promise<void>((resolve, reject) => {
@@ -22,6 +27,11 @@ export class TaskAdapterService {
             this.tasks$.next(
               this.tasks$.value.map((t) => (t._id === task._id ? task : t))
             );
+            console.log('Task updated successfully:', data);
+            this.taskEvents$.next({
+              type: 'taskUpdated',
+              task: task,
+            });
             resolve();
           },
           error: (error) => {
@@ -62,6 +72,13 @@ export class TaskAdapterService {
               return mappedTask;
             })
           );
+          console.log(
+            `Task (${taskId}) successfully assigned to space (${spaceId})`
+          );
+          this.taskEvents$.next({
+            type: 'taskAssignedToSpace',
+            task: result,
+          });
         },
         error: (error) => {
           console.error(
@@ -82,6 +99,11 @@ export class TaskAdapterService {
         .subscribe({
           next: (data) => {
             this.tasks$.next([...this.tasks$.getValue(), data.task]);
+            console.log('Task added successfully:', data.task);
+            this.taskEvents$.next({
+              type: 'taskAdded',
+              task: task,
+            });
             resolve();
           },
           error: (error) => {
@@ -101,9 +123,16 @@ export class TaskAdapterService {
       this.http.delete(`http://localhost:3000/api/tasks/${_id}`).subscribe({
         next: () => {
           console.log(`Task successfuly deleted with id: ${_id}`);
+          const deleteTask = this.tasks$.value.find(
+            (task) => task._id === _id
+          );
           this.tasks$.next(
             this.tasks$.value.filter((task) => task._id !== _id)
           );
+          this.taskEvents$.next({
+            type: 'taskDeleted',
+            task: deleteTask!,
+          });
           resolve();
         },
         error: (error) => {
@@ -112,6 +141,7 @@ export class TaskAdapterService {
       });
     });
   }
+
   setTaskState(_id: string, newState: boolean): Promise<void> {
     return new Promise<void>((resolve, reject) => {
       this.http
@@ -125,6 +155,13 @@ export class TaskAdapterService {
                 task._id === _id ? responseTask : task
               )
             );
+            console.log(
+              `Task state updated successfully for task with id: ${_id}`
+            );
+            this.taskEvents$.next({
+              type: 'taskStateChanged',
+              task: responseTask,
+            });
             resolve();
           },
           error: (error) => {

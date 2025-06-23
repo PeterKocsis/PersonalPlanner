@@ -1,7 +1,6 @@
 import {
   Component,
   computed,
-  effect,
   inject,
   model,
   signal,
@@ -30,7 +29,7 @@ import { RangeSelectorComponent } from '../../range-selector/range-selector.comp
 import { ITimeRange } from '../../interfaces/time-range.interface';
 import { TimeFrameAdapterService } from '../../../adapters/time-frame.adapter.service';
 import { ITimeFrame } from '../../interfaces/time-frame.interface';
-import { last } from 'rxjs';
+import { AppStateService } from '../../../services/app-state.service';
 
 @Component({
   selector: 'app-task-editor-dialog',
@@ -52,12 +51,24 @@ import { last } from 'rxjs';
 export class TaskEditorDialogComponent {
   taskeditorDialogService = inject(TaskEditorDialogService);
   timeFrameService = inject(TimeFrameAdapterService);
+  appStateservice = inject(AppStateService);
   readonly dialogRef = inject(MatDialogRef<TaskEditorDialogComponent>);
   readonly data = inject<{ task: ITask; spaceId: string | undefined }>(
     MAT_DIALOG_DATA
   );
-
-  selectedTimeFrame = signal<ITimeFrame | undefined>(undefined);
+  selectedTimeRange = model<ITimeRange | undefined>(undefined);
+  selectedTimeFrame = computed((): ITimeFrame | undefined => {
+    if (this.selectedTimeRange() === undefined) {
+      return this.appStateservice.timeFrames()[0] || undefined;
+    }
+    return this.appStateservice
+      .timeFrames()
+      .find(
+        (frame) =>
+          frame.year === this.selectedTimeRange()?.year &&
+          frame.index === this.selectedTimeRange()?.index
+      );
+  });
 
   form = new FormGroup({
     title: new FormControl<string | undefined>(this.data.task.title, {
@@ -91,16 +102,6 @@ export class TaskEditorDialogComponent {
       : '';
   }
 
-  constructor() {
-    effect(() => {
-      if (this.selectedTimeFrame() === undefined) {
-        this.selectedTimeFrame.set(
-          this.timeFrameService.timeFrames()[0] || undefined
-        );
-      }
-    });
-  }
-
   onOpenFrameBrowser() {
     this.showTimaRangeSelector.set(true);
     this.dialogRef.updateSize('1200px');
@@ -120,12 +121,8 @@ export class TaskEditorDialogComponent {
 
   async onSelectionChanged(ranges: ITimeRange[]) {
     this.form.get('assignedTimeRange')?.setValue(ranges?.[0]);
-    const startDate = ranges[0].startDate;
-    const endDate = ranges[ranges.length - 1].startDate;
-    const resultFrame = (
-      await this.timeFrameService.getTimeFrames(startDate, endDate)
-    )[0];
-    this.selectedTimeFrame.set(resultFrame);
+    this.selectedTimeRange.set(ranges?.[0]);
+    await this.timeFrameService.getFramesByRanges(ranges)
   }
 
   onCancel() {

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
@@ -12,6 +12,7 @@ import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.servi
 import { RangeSelectorComponent } from '../range-selector/range-selector.component';
 import { ITimeRange } from '../interfaces/time-range.interface';
 import { ITimeFrame } from '../interfaces/time-frame.interface';
+import { AppStateService } from '../../services/app-state.service';
 
 @Component({
   selector: 'app-planner',
@@ -32,15 +33,22 @@ import { ITimeFrame } from '../interfaces/time-frame.interface';
 })
 export class PlannerComponent {
   timeFrameService = inject(TimeFrameAdapterService);
-  timeFrames = this.timeFrameService.timeFrames;
-  selectedTimeFrames = signal<ITimeFrame[]>([]);
+  appStateService = inject(AppStateService);
+  timeFrames = this.appStateService.timeFrames;
+  selectedTimeRanges = signal<ITimeRange[]>([]);
+  selectedTimeFrames = computed(() => {
+    return this.appStateService.timeFrames().filter((frame) => {
+      return this.selectedTimeRanges().some(
+        (range) =>
+          range.year === frame.year && range.index === frame.index
+      );
+    });
+  });
 
 
-  async onSelectedRangeChanged(selectedRanges: ITimeRange[]) {
-    const startDate = selectedRanges[0].startDate;
-    const endDate = selectedRanges[selectedRanges.length - 1].startDate;
-    const result = await this.timeFrameService.getTimeFrames(startDate, endDate);
-    this.selectedTimeFrames.set(result);
+  onSelectedRangeChanged(selectedRanges: ITimeRange[]) {
+    this.selectedTimeRanges.set(selectedRanges);
+    this.timeFrameService.getFramesByRanges(selectedRanges);
   }
 
 }
