@@ -57,6 +57,7 @@ export class AppStateService implements OnDestroy {
       if (this._authService.userAuthenticated()) {
         this._spacesService.getSpaces();
         this._spacesService.getInbox();
+        this._taskAdapterService.getAllTask();
       }
     });
   }
