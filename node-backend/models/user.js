@@ -1,11 +1,13 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
-const spacePriority = require('./spacePriority');
 
 
 const userSchema = mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
+    inboxSpaceId: {type: String },
+    othersSpaceId: {type: String },
+    spacePriorityId: { type: String },
 });
 
 userSchema.plugin(uniqueValidator);

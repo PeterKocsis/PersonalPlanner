@@ -53,6 +53,12 @@ router.post('/signup', [
         await othersSpace.save({session});
         await spacePrio.save({ session });
 
+        // Add the inbox and others spaces to the user data
+        savedUser.inboxSpaceId = inboxSpace._id;
+        savedUser.othersSpaceId = othersSpace._id;
+        savedUser.spacePriorityId = spacePrio._id;
+        await savedUser.save({ session });
+
         await session.commitTransaction();
         session.endSession();
 

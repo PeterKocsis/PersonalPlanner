@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Task = require("../models/task");
+const User = require("../models/user");
 const checkAuth = require("../middleware/check-auth");
 const {
   addTaskToPocket,
@@ -119,6 +120,18 @@ router.put("/:id", checkAuth, async (req, res, next) => {
       await removeTaskFromPocket(req.params.id, session, req.userData.userId);
       await addTaskToPocket(task, session, req.userData.userId);
     }
+    // if task spaceId match with the user inboxSpaceRef, then set the spaceId to othersSpaceRef
+    const userData = await User.findOne({email: req.userData.email});
+    console.log("User data:", userData);
+    if (
+      task.spaceId === userData.inboxSpaceId
+    ) {
+      task.spaceId = userData.othersSpaceId;
+    }
+
+    console.log("Stored task:", storedTask);
+    console.log("Task to update:", task);
+
     // Update the task with the new values
     await storedTask
       .set({
