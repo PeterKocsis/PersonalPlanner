@@ -45,14 +45,23 @@ router.post("", checkAuth, async (req, res, next) => {
       assignedTimeRange: task.assignedTimeRange,
       scheduledDayId: task.scheduledDayId || undefined,
     });
-    //Check if task is in pocket
+    //Add task to pocket if assignedTimeRange is present
     if (newTask.assignedTimeRange) {
       console.log("Task is in pocket, adding to pocket");
       await addTaskToPocket(newTask, session, req.userData.userId);
+      // if task spaceId match with the user inboxSpaceRef, then set the spaceId to othersSpaceRef
+      const userData = await User.findOne({ email: req.userData.email });
+      console.log("User data:", userData);
+      if (newTask.spaceId === userData.inboxSpaceId) {
+        newTask.spaceId = userData.othersSpaceId;
+      }
     }
     const savedTask = await newTask.save({ session });
     console.log("Task saved:", savedTask);
-    const modifiedFrame = await collectFrameData(task.assignedTimeRange, req.userData.userId);
+    const modifiedFrame = await collectFrameData(
+      task.assignedTimeRange,
+      req.userData.userId
+    );
     await session.commitTransaction();
     session.endSession();
     res.status(201).json({
@@ -74,8 +83,16 @@ router.delete("/:id", checkAuth, async (req, res, next) => {
   session.startTransaction();
   console.log("Deleting task with ID:", taskId);
   try {
-    const task = await Task.findOne({ _id: taskId, ownerId: req.userData.userId });
-    await removeTaskFromPocket(taskId, task.assignedTimeRange, session, req.userData.userId);
+    const task = await Task.findOne({
+      _id: taskId,
+      ownerId: req.userData.userId,
+    });
+    await removeTaskFromPocket(
+      taskId,
+      task.assignedTimeRange,
+      session,
+      req.userData.userId
+    );
     await Task.deleteOne({ _id: taskId, ownerId: req.userData.userId }).session(
       session
     );
@@ -121,11 +138,9 @@ router.put("/:id", checkAuth, async (req, res, next) => {
       await addTaskToPocket(task, session, req.userData.userId);
     }
     // if task spaceId match with the user inboxSpaceRef, then set the spaceId to othersSpaceRef
-    const userData = await User.findOne({email: req.userData.email});
+    const userData = await User.findOne({ email: req.userData.email });
     console.log("User data:", userData);
-    if (
-      task.spaceId === userData.inboxSpaceId
-    ) {
+    if (task.spaceId === userData.inboxSpaceId) {
       task.spaceId = userData.othersSpaceId;
     }
 
