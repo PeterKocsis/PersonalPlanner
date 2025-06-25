@@ -1,21 +1,32 @@
-<div style="display: flex; justify-content: space-between; width: 100%;">
-    <div style="flex: 1; text-align: center; border: 1px solid #ccc; margin: 0 5px;">
-        <form name="Create Space">
-            <mat-form-field appearance="fill">
-                <mat-label>Space Name</mat-label>
-                <input matInput [(ngModel)]="newSpaceName" name="spaceName" required>
-            </mat-form-field>
-        
-            <button mat-raised-button color="primary" (click)="addSpace()">Add Space</button>
-        </form>
-        
-        <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
-            @for (space of spaces(); track space; let i = $index) {
-              <app-space-item [spaceItem]="space" class="example-box" cdkDrag></app-space-item>
-            }
-        </div>
-    </div>
-    <div style="flex: 1; text-align: center; border: 1px solid #ccc; margin: 0 5px;">Column 2</div>
-    <div style="flex: 1; text-align: center; border: 1px solid #ccc; margin: 0 5px;">Column 3</div>
-</div>
+<div style="width: 100%; height: 85%;">
+    <mat-tab-group>
+        <mat-tab label="Spaces">
+            <form name="Create Space">
+                <mat-form-field appearance="fill">
+                    <mat-label>Space Name</mat-label>
+                    <input matInput [(ngModel)]="newSpaceName" name="spaceName" required>
+                </mat-form-field>
 
+                <button mat-raised-button color="primary" (click)="addSpace()">Add Space</button>
+            </form>
+
+            <div cdkDropList class="example-list" (cdkDropListDropped)="drop($event)">
+                @for (space of spaces(); track space; let i = $index) {
+                <app-space-item [spaceItem]="space" class="example-box" cdkDrag></app-space-item>
+                }
+            </div>
+        </mat-tab>
+        <mat-tab label="Availability">
+            <div
+                style="display: flex; margin-top: 1rem; flex-direction: row; justify-content: space-between; gap: 1rem; width: 100%;">
+                @for (day of days; track $index; let i = $index) {
+                    <app-daily-time-slot-editor
+                        style="display: flex; flex-direction: column; width: calc( (100% - (6 * 1rem)) / 7);"
+                        [dayName]="day" [timeSlots]="ranges()[day]" [showTimeScale]="i === 0">
+                    </app-daily-time-slot-editor>
+                }
+            </div>
+        </mat-tab>
+        <mat-tab label="Balance"></mat-tab>
+    </mat-tab-group>
+</div>
