@@ -1,1 +1,8 @@
-<p>availability-editor works!</p>
+<div
+    style="display: flex; margin-top: 1rem; flex-direction: row; justify-content: space-between; gap: 1rem; width: 100%;">
+    @for (day of days; track $index; let i = $index) {
+    <app-daily-time-slot-editor style="display: flex; flex-direction: column; width: calc( (100% - (6 * 1rem)) / 7);"
+        [dayName]="day" [timeSlots]="ranges()[day]" [showTimeScale]="i === 0">
+    </app-daily-time-slot-editor>
+    }
+</div>
