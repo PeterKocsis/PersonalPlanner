@@ -1,8 +1,6 @@
 import {
   Component,
-  ElementRef,
   inject,
-  viewChildren,
 } from '@angular/core';
 import {
   DragDropModule,
@@ -41,7 +39,6 @@ import { AvailabilityEditorComponent } from './availability-editor/availability-
 export class SpaceManagerComponent {
   spaceService = inject(SpacesService);
   appStateService = inject(AppStateService);
-  schedules = viewChildren<ElementRef<HTMLCanvasElement>>('canvas');
 
   spaces = this.appStateService.spaces;
   newSpaceName: string = '';

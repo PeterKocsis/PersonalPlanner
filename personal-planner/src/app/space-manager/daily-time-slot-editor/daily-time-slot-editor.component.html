@@ -1,16 +1,5 @@
 <div #daily style="display: flex; flex-direction: column; width: 100%;">
     <h2 style="align-self: center;">{{dayName()}}</h2>
     <canvas id="schedule" #schedule style="height: 480px;  border-radius: 4px;" [height]="480"></canvas>
-    <button mat-raised-button color="primary">Add Time Slot</button>
-    <h4 style="margin: 0px; margin: auto">Time Slots</h4>
-    @for (range of timeSlots(); track range) {
-    <div style="display: flex; flex-direction: row; align-items: center;">
-        <div>{{`${range.start.hour | number: '2.0-0'}:${range.start.minutes | number:
-            '2.0-0'}-${range.end.hour | number: '2.0-0'}:${range.end.minutes | number: '2.0-0'}`}}
-        </div>
-        <button mat-icon-button color="warn">
-            <mat-icon>delete</mat-icon>
-        </button>
-    </div>
-    }
+    <button mat-raised-button color="primary" (click)="onEditTimeSlot()">Edit Time Slot</button>
 </div>

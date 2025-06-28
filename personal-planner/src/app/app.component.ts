@@ -8,6 +8,7 @@ import { AuthService } from './auth/auth.service';
 import { TaskEditorDialogService } from '../services/task-editor-dialog.service';
 import { MatButtonModule } from '@angular/material/button';
 
+
 @Component({
   selector: 'app-root',
   imports: [

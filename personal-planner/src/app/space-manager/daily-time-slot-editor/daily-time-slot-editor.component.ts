@@ -4,11 +4,15 @@ import {
   Component,
   effect,
   ElementRef,
+  inject,
   input,
+  output,
   viewChild,
 } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
+import { MatDialog } from '@angular/material/dialog';
+import { MatIcon, MatIconModule } from '@angular/material/icon';
+import { AddTimeSlotComponent } from '../add-time-slot/add-time-slot.component';
 
 export type TimeSlot = {
   start: {
@@ -28,12 +32,18 @@ export type TimeSlot = {
   styleUrl: './daily-time-slot-editor.component.scss',
 })
 export class DailyTimeSlotEditorComponent implements AfterViewInit {
+  dialog = inject(MatDialog);
+
   dayName = input.required<string>();
   showTimeScale = input<boolean>(false);
   timeSlots = input.required<TimeSlot[] | undefined>();
+
+  timeSlotChanged = output<TimeSlot[]>();
+
   timeScale = Array.from({ length: 24 }, (_, i) => {
     return i;
   });
+
 
   scheduleCanvas =
     viewChild.required<ElementRef<HTMLCanvasElement>>('schedule');
@@ -138,5 +148,25 @@ export class DailyTimeSlotEditorComponent implements AfterViewInit {
 
     this.scheduleCanvasContext.fillStyle = 'rgba(0, 150, 136, 0.5)';
     this.scheduleCanvasContext.fillRect(0, startY, width, endY - startY);
+  }
+
+  onEditTimeSlot() {
+    const dialogRef = this.dialog.open(AddTimeSlotComponent, {
+      data: { timeSlots: this.timeSlots() },
+      width: '600px',
+    });
+    dialogRef.afterClosed().subscribe((result) => {
+      // if (result) {
+      // this.drawDataOnCanvas(
+      //   this.canvasWidth,
+      //   this.canvasHeight,
+      //     result
+      //   );
+      // }
+      if(result) {
+        this.timeSlotChanged.emit(result);
+      }
+      console.log('Time slots updated:', result);
+    });
   }
 }

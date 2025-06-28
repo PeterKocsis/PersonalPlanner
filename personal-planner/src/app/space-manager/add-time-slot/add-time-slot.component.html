@@ -1,1 +1,43 @@
-<p>add-time-slot works!</p>
+<mat-card>
+    <mat-card-header>
+        <mat-card-title>
+            <h2 style="margin: 0px; margin: auto">Available Time Slots</h2>
+        </mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+        <div style="display: flex; flex-direction: column; gap: 1rem;">
+            <form [formGroup]="form">
+                @for (slot of timeSlots.controls; track $index; let i = $index) {
+                <div style="display: flex; flex-direction: row; align-items: center; gap: 1rem">
+                    <mat-form-field appearance="fill" style="width: 200px;">
+                        <mat-label>Start Time</mat-label>
+                        <input matInput [matTimepickerMin]="getTimeSlotStartMin(i)"
+                            [matTimepickerMax]="getTimeSlotStartMax(i)" [matTimepicker]="startTimePicker"
+                            [formControl]="slot.controls.start">
+                        <mat-timepicker #startTimePicker></mat-timepicker>
+                    </mat-form-field>
+                    <span>to</span>
+                    <mat-form-field appearance="fill" style="width: 200px;">
+                        <mat-label>End Time</mat-label>
+                        <input matInput [matTimepickerMin]="getTimeSlotEndMin(i)"
+                            [matTimepickerMax]="getTimeSlotEndMax(i)" [matTimepicker]="endTimePicker"
+                            [formControl]="slot.controls.end">
+                        <mat-timepicker #endTimePicker></mat-timepicker>
+                    </mat-form-field>
+                    <button mat-mini-fab color="warn">
+                        <mat-icon (click)="onRemoveTimeSlot(i)">delete</mat-icon>
+                    </button>
+                </div>
+                }
+            </form>
+            <button mat-raised-button color="primary" (click)="onAddTimeSlot()">Add Time Slot</button>
+        </div>
+
+    </mat-card-content>
+    <mat-card-actions [align]="'end'" style="margin-top: 1rem;">
+        <div style="display: flex; flex-direction: row; gap: 1rem;">
+            <button mat-raised-button color="accent" (click)="onCancel()">Cancel</button>
+            <button mat-raised-button color="primary" (click)="onSave()">Apply Changes</button>
+        </div>
+    </mat-card-actions>
+</mat-card>
