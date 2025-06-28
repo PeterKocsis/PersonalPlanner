@@ -1,8 +1,11 @@
 <div
     style="display: flex; margin-top: 1rem; flex-direction: row; justify-content: space-between; gap: 1rem; width: 100%;">
-    @for (day of days; track $index; let i = $index) {
+    @for (availability of dailyAvailabilities(); track $index; let i = $index) {
+
+    @if (availability.isAvailable || showUnavailableDays()) {
     <app-daily-time-slot-editor style="display: flex; flex-direction: column; width: calc( (100% - (6 * 1rem)) / 7);"
-        [dayName]="day" [timeSlots]="ranges()[day]" [showTimeScale]="i === 0" (timeSlotChanged)="onTimeSlotChanged($event, day)">
+        [dailyAvailability]="availability" (timeSlotChanged)="onTimeSlotChanged($event, i)" (availabilityChanged)="onAvailabilityChanged($event, i)">
     </app-daily-time-slot-editor>
+    }
     }
 </div>

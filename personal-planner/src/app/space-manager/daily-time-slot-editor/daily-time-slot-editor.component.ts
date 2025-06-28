@@ -1,7 +1,9 @@
 import { CommonModule } from '@angular/common';
 import {
+  afterNextRender,
   AfterViewInit,
   Component,
+  computed,
   effect,
   ElementRef,
   inject,
@@ -13,17 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatIcon, MatIconModule } from '@angular/material/icon';
 import { AddTimeSlotComponent } from '../add-time-slot/add-time-slot.component';
-
-export type TimeSlot = {
-  start: {
-    hour: number;
-    minutes: number;
-  };
-  end: {
-    hour: number;
-    minutes: number;
-  };
-};
+import { IDailyAvailability, ITimeSlot } from '../../interfaces/time-slot';
 
 @Component({
   selector: 'app-daily-time-slot-editor',
@@ -34,20 +26,26 @@ export type TimeSlot = {
 export class DailyTimeSlotEditorComponent implements AfterViewInit {
   dialog = inject(MatDialog);
 
-  dayName = input.required<string>();
-  showTimeScale = input<boolean>(false);
-  timeSlots = input.required<TimeSlot[] | undefined>();
+  editMode = input<boolean>(true);
+  dailyAvailability = input.required<IDailyAvailability>();
+  timeSlots = computed(() => {
+    return this.dailyAvailability()?.timeSlots;
+  });
 
-  timeSlotChanged = output<TimeSlot[]>();
+  timeSlotChanged = output<ITimeSlot[]>();
+  availabilityChanged = output<boolean>();
 
   timeScale = Array.from({ length: 24 }, (_, i) => {
     return i;
   });
 
-
   scheduleCanvas =
     viewChild.required<ElementRef<HTMLCanvasElement>>('schedule');
   scheduleCanvasContext: CanvasRenderingContext2D | null | undefined = null;
+
+  canvasWrapper = viewChild.required<ElementRef<HTMLDivElement>>(
+    'canvasWrapper'
+  );
 
   canvasWidth = 0;
   canvasHeight = 0;
@@ -62,6 +60,20 @@ export class DailyTimeSlotEditorComponent implements AfterViewInit {
     });
   }
 
+  //TODO!! Match index with the day index of the Date object
+  getDayName(index: number): string {
+    const days = [
+      'Monday',
+      'Tuesday',
+      'Wednesday',
+      'Thursday',
+      'Friday',
+      'Saturday',
+      'Sunday',
+    ];
+    return days[index % 7];
+  }
+
   ngAfterViewInit(): void {
     if (this.scheduleCanvas().nativeElement.getContext) {
       this.scheduleCanvasContext =
@@ -69,17 +81,18 @@ export class DailyTimeSlotEditorComponent implements AfterViewInit {
       this.canvasWidth = Math.floor(this.scheduleCanvas().nativeElement.width);
       this.canvasHeight = Math.floor(this.scheduleCanvas().nativeElement.height);
     }
+    
     this.drawDataOnCanvas(
-      this.canvasWidth,
-      this.canvasHeight,
-      this.timeSlots()
-    );
-  }
-
+        this.canvasWidth,
+        this.canvasHeight,
+        this.timeSlots()
+      );
+    }
+  
   private drawDataOnCanvas(
     width: number,
     height: number,
-    timeSlots: TimeSlot[] | undefined
+    timeSlots: ITimeSlot[] | undefined
   ): void {
     console.log('Drawing on canvas');
     if (!this.canDraw() && !this.scheduleCanvasContext) return;
@@ -135,7 +148,7 @@ export class DailyTimeSlotEditorComponent implements AfterViewInit {
   private drawAvailableTimeSlots(
     width: number,
     height: number,
-    slot: TimeSlot
+    slot: ITimeSlot
   ): void {
     if (!this.scheduleCanvasContext) return;
     console.log('Drawing time slot:', slot);
@@ -156,17 +169,15 @@ export class DailyTimeSlotEditorComponent implements AfterViewInit {
       width: '600px',
     });
     dialogRef.afterClosed().subscribe((result) => {
-      // if (result) {
-      // this.drawDataOnCanvas(
-      //   this.canvasWidth,
-      //   this.canvasHeight,
-      //     result
-      //   );
-      // }
-      if(result) {
+      if (result) {
         this.timeSlotChanged.emit(result);
       }
       console.log('Time slots updated:', result);
     });
+  }
+
+  onChangeAvailability() {
+    const newAvailability = !this.dailyAvailability().isAvailable;
+    this.availabilityChanged.emit(newAvailability);
   }
 }

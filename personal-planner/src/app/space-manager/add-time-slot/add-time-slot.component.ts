@@ -2,7 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component, inject, input, OnInit } from '@angular/core';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
-import { TimeSlot } from '../daily-time-slot-editor/daily-time-slot-editor.component';
+import { ITimeSlot } from '../../interfaces/time-slot';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatCardModule } from '@angular/material/card';
 import {
@@ -29,8 +29,8 @@ import { MatTimepickerModule } from '@angular/material/timepicker';
   styleUrl: './add-time-slot.component.scss',
 })
 export class AddTimeSlotComponent implements OnInit {
-  readonly dialogRef = inject(MatDialogRef<AddTimeSlotComponent>);
-  readonly data = inject<{ timeSlots: TimeSlot[] | undefined }>(
+  readonly dialogRef = inject(MatDialogRef<AddTimeSlotComponent, ITimeSlot[]>);
+  readonly data = inject<{ timeSlots: ITimeSlot[] | undefined }>(
     MAT_DIALOG_DATA
   );
 
@@ -79,24 +79,30 @@ export class AddTimeSlotComponent implements OnInit {
     if (index === this.timeSlots.length - 1) {
       return '24:00';
     }
-    return `${this.timeSlots.controls[index + 1].value.start?.getHours()}:${
-      this.timeSlots.controls[index + 1].value.start?.getMinutes()
-    }`;
+    return `${this.timeSlots.controls[
+      index + 1
+    ].value.start?.getHours()}:${this.timeSlots.controls[
+      index + 1
+    ].value.start?.getMinutes()}`;
   }
 
   getTimeSlotEndMin(index: number): string {
-    return `${this.timeSlots.controls[index].value.start?.getHours()}:${
-      this.timeSlots.controls[index].value.start?.getMinutes()
-    }`;
+    return `${this.timeSlots.controls[
+      index
+    ].value.start?.getHours()}:${this.timeSlots.controls[
+      index
+    ].value.start?.getMinutes()}`;
   }
 
   getTimeSlotEndMax(index: number): string {
     if (index === this.timeSlots.length - 1) {
       return '24:00';
     }
-    return `${this.timeSlots.controls[index + 1].value.start?.getHours()}:${
-      this.timeSlots.controls[index + 1].value.start?.getMinutes()
-    }`;
+    return `${this.timeSlots.controls[
+      index + 1
+    ].value.start?.getHours()}:${this.timeSlots.controls[
+      index + 1
+    ].value.start?.getMinutes()}`;
   }
 
   onAddTimeSlot() {
@@ -104,10 +110,14 @@ export class AddTimeSlotComponent implements OnInit {
     const endTime = new Date();
     startTime.setHours(0, 0, 0, 0);
     endTime.setHours(23, 30, 0, 0);
-    if(this.timeSlots.length > 0) {
+    if (this.timeSlots.length > 0) {
       startTime.setHours(
-        this.timeSlots.controls[this.timeSlots.length - 1].value.end!.getHours(),
-        this.timeSlots.controls[this.timeSlots.length - 1].value.end!.getMinutes()
+        this.timeSlots.controls[
+          this.timeSlots.length - 1
+        ].value.end!.getHours(),
+        this.timeSlots.controls[
+          this.timeSlots.length - 1
+        ].value.end!.getMinutes()
       );
       endTime.setHours(23, 30, 0, 0);
     }
@@ -129,7 +139,7 @@ export class AddTimeSlotComponent implements OnInit {
 
   onSave() {
     if (this.form.valid) {
-      const timeSlots: TimeSlot[] = this.timeSlots.controls.map((slot) => ({
+      const timeSlots: ITimeSlot[] = this.timeSlots.controls.map((slot) => ({
         start: {
           hour: slot.value.start!.getHours(),
           minutes: slot.value.start!.getMinutes(),
