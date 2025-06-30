@@ -2,7 +2,7 @@
     <div style="display: flex; flex-direction: row;justify-content: center; align-items: center; gap: 1rem;">
         <h2 style="align-self: center; margin: 0px">{{getDayName(dailyAvailability()!.dayIndex)}}</h2>
         <button mat-icon-button class="material-icons-outlined" (click)="onChangeAvailability()">
-            <mat-icon [color]="dailyAvailability().isAvailable ? 'warn' : 'primary'">power_settings_new</mat-icon>
+            <mat-icon [color]="dailyAvailability().isAvailable ? 'primary' : 'warn'">power_settings_new</mat-icon>
         </button>
     </div>
     <canvas id="schedule" #schedule style="height: 480px;  border-radius: 4px;" [height]="480" ></canvas>
