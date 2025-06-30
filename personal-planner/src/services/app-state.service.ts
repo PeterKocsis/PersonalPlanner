@@ -7,6 +7,8 @@ import { TimeFrameAdapterService } from '../adapters/time-frame.adapter.service'
 import { AuthService } from '../app/auth/auth.service';
 import { ITask } from '../app/interfaces/task.interface';
 import { ISpace } from '../app/interfaces/space.interface';
+import { SettingsAdapterService } from '../adapters/settings-adapter.service';
+import { ISettings } from '../app/interfaces/setting.interface';
 
 @Injectable({
   providedIn: 'root',
@@ -16,10 +18,12 @@ export class AppStateService implements OnDestroy {
   spaces = signal<ISpace[]>([]);
   inboxSpace = signal<ISpace | undefined>(undefined);
   timeFrames = signal<ITimeFrame[]>([]);
+  settings = signal<ISettings | undefined>(undefined)
 
   private _authService = inject(AuthService);
   private _taskAdapterService = inject(TaskAdapterService);
   private _timeFrameAdapterService = inject(TimeFrameAdapterService);
+  private _settingsAdapterService = inject(SettingsAdapterService);
   private _spacesService = inject(SpacesService);
 
   private subscribtions: Subscription[] = [];
@@ -50,6 +54,10 @@ export class AppStateService implements OnDestroy {
 
       this._timeFrameAdapterService.timeFrames$.subscribe((timeFrames) => {
         this.timeFrames.set(timeFrames);
+      }),
+
+      this._settingsAdapterService.settings$.subscribe((settings) => {
+        this.settings.set(settings);
       })
     );
     //Fetch initial data on user authentication
@@ -58,6 +66,7 @@ export class AppStateService implements OnDestroy {
         this._spacesService.getSpaces();
         this._spacesService.getInbox();
         this._taskAdapterService.getAllTask();
+        this._settingsAdapterService.getSettings();
       }
     });
   }
