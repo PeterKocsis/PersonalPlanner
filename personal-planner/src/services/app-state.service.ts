@@ -1,4 +1,11 @@
-import { effect, inject, Injectable, OnDestroy, signal } from '@angular/core';
+import {
+  computed,
+  effect,
+  inject,
+  Injectable,
+  OnDestroy,
+  signal,
+} from '@angular/core';
 import { ITimeFrame } from '../app/interfaces/time-frame.interface';
 import { TaskAdapterService } from '../adapters/task.adapter.service';
 import { SpacesService } from '../adapters/spaces.service';
@@ -18,7 +25,40 @@ export class AppStateService implements OnDestroy {
   spaces = signal<ISpace[]>([]);
   inboxSpace = signal<ISpace | undefined>(undefined);
   timeFrames = signal<ITimeFrame[]>([]);
-  settings = signal<ISettings | undefined>(undefined)
+  settings = signal<ISettings | undefined>(undefined);
+  totalAvailableTime = computed((): number => {
+    if (this.settings() === undefined) {
+      return 0;
+    }
+    return this.settings()!.frameSettings.availability.dailyAvailabilities.reduce(
+      (total, availability) => {
+        if (availability.isAvailable) {
+          return (
+            total +
+            availability.timeSlots.reduce(
+              (dayTotal, slot) =>
+                dayTotal +
+                (slot.end.hour - slot.start.hour) * 60 +
+                (slot.end.minutes - slot.start.minutes),
+              0
+            )
+          );
+        }
+        return total;
+      },
+      0
+    );
+  });
+
+  assignableTime = computed((): number => {
+    if (this.settings() === undefined) {
+      return 0;
+    }
+    return (
+      this.totalAvailableTime() *
+      this.settings()!.frameSettings.availability.useRatio
+    );
+  });
 
   private _authService = inject(AuthService);
   private _taskAdapterService = inject(TaskAdapterService);
@@ -40,9 +80,11 @@ export class AppStateService implements OnDestroy {
           case 'taskUpdated':
           case 'taskAssignedToSpace':
             if (event.task.assignedTimeRange) {
-              this._timeFrameAdapterService.getFrameByRange(event.task.assignedTimeRange) 
+              this._timeFrameAdapterService.getFrameByRange(
+                event.task.assignedTimeRange
+              );
             }
-          }
+        }
       }),
 
       this._spacesService.spaces$.subscribe((spaces) => {

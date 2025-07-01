@@ -19,4 +19,5 @@ export interface ITimeFrameAvailabilityTemplate {
   name: string;
   description?: string;
   dailyAvailabilities: IDailyAvailability[];
+  useRatio: number;
 }

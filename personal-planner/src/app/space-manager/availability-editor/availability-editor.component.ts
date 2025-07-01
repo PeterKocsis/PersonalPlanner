@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AppStateService } from '../../../services/app-state.service';
 import { SettingsAdapterService } from '../../../adapters/settings-adapter.service';
+import { MatCardModule } from '@angular/material/card';
 
 @Component({
   selector: 'app-availability-editor',
@@ -20,6 +21,7 @@ import { SettingsAdapterService } from '../../../adapters/settings-adapter.servi
     MatInputModule,
     CommonModule,
     FormsModule,
+    MatCardModule
   ],
   templateUrl: './availability-editor.component.html',
   styleUrl: './availability-editor.component.scss',
@@ -47,7 +49,13 @@ export class AvailabilityEditorComponent {
           (availability) => availability.isAvailable
         ).length;
   });
-  plannedTimePortion: number = 0.5;
+  get plannedTimePortion(): number {
+    return (Math.round(this.appStateService.settings()!.frameSettings.availability.useRatio * 100)) || 50;
+  }
+
+  set plannedTimePortion(value: number) {
+    this.settingsAdapterService.updateUseRatio(value / 100);
+  }
 
   onTimeSlotChanged(changedDayTimeSlots: ITimeSlot[], dayIndex: number) {
     this.settingsAdapterService.updateTimeSlots(changedDayTimeSlots, dayIndex);
@@ -56,23 +64,27 @@ export class AvailabilityEditorComponent {
     this.settingsAdapterService.updateAvailability($event, dayIndex);
   }
 
-  totalAvailableTime = computed((): number => {
-    return this.dailyAvailabilities().reduce((total, availability) => {
-      if (availability.isAvailable) {
-        return (
-          total +
-          availability.timeSlots.reduce(
-            (dayTotal, slot) =>
-              dayTotal +
-              (slot.end.hour - slot.start.hour) * 60 +
-              (slot.end.minutes - slot.start.minutes),
-            0
-          )
-        );
-      }
-      return total;
-    }, 0);
-  });
+  totalAvailableTime = this.appStateService.totalAvailableTime;
+  assignableTime = this.appStateService.assignableTime;
+
+
+  // totalAvailableTime = computed((): number => {
+  //   return this.dailyAvailabilities().reduce((total, availability) => {
+  //     if (availability.isAvailable) {
+  //       return (
+  //         total +
+  //         availability.timeSlots.reduce(
+  //           (dayTotal, slot) =>
+  //             dayTotal +
+  //             (slot.end.hour - slot.start.hour) * 60 +
+  //             (slot.end.minutes - slot.start.minutes),
+  //           0
+  //         )
+  //       );
+  //     }
+  //     return total;
+  //   }, 0);
+  // });
 
   toggleDisplayUnavailableDays() {
     this.showUnavailableDays.update((current) => !current);

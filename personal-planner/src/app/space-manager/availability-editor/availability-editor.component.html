@@ -1,23 +1,49 @@
-<div
-    style="display: flex; margin-top: 1rem; flex-direction: row; justify-content: space-between; gap: 1rem; width: 100%;">
-    @for (availability of dailyAvailabilities(); track $index; let i = $index) {
+<div style="display: flex; flex-direction: row; gap: 1rem; width: 100%; justify-content: space-between;">
+    <div style="display: flex; flex: 1; flex-direction: column; margin-top: 1rem; width: 300px;">
+        <mat-card>
+            <mat-card-header>
+                <mat-card-title>
+                    <h2>Week Availablity</h2>
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <mat-form-field>
+                    <mat-label>Total Availability</mat-label>
+                    <input type="text" matInput readonly [value]="totalAvailableTime()/60 | number: '1.1-1'">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>Portion to use</mat-label>
+                    <input type="number" matInput ngModel [(ngModel)]="plannedTimePortion" name="plannedTimePortion"
+                        min="0" max="100" step="1">
+                </mat-form-field>
+                <mat-form-field>
+                    <mat-label>
+                        Assignable time (total * portion)
+                    </mat-label>
+                    <input type="text" matInput readonly [value]="assignableTime()/60 | number: '1.1-1'">
+                </mat-form-field>
+            </mat-card-content>
+        </mat-card>
+
+    </div>
+    <div
+        style="display: flex; flex: 1; margin-top: 1rem; flex-direction: row; justify-content: space-between; gap: 1rem; width: 80%">
+        @for (availability of dailyAvailabilities(); track $index; let i = $index) {
 
         @if (availability.isAvailable || showUnavailableDays()) {
-            <app-daily-time-slot-editor style="display: flex; flex-direction: column; width: calc( (100% - (6 * 1rem)) / 7);"
-                [dailyAvailability]="availability" (timeSlotChanged)="onTimeSlotChanged($event, i)" (availabilityChanged)="onAvailabilityChanged($event, i)">
-            </app-daily-time-slot-editor>
+        <app-daily-time-slot-editor
+            style="display: flex; flex-direction: column; width: calc( (100% - (6 * 1rem)) / 7);"
+            [dailyAvailability]="availability" (timeSlotChanged)="onTimeSlotChanged($event, i)"
+            (availabilityChanged)="onAvailabilityChanged($event, i)">
+        </app-daily-time-slot-editor>
         }
-    }
-</div>
-<div>
-    <button mat-mini-fab color="primary" (click)="toggleDisplayUnavailableDays()">
-        <mat-icon class="material-icons-outlined">{{showUnavailableDays() ? 'visibility' : 'visibility_off'}}</mat-icon>
-    </button>
-    <h2>Total Availablity in week: {{(totalAvailableTime()/60) | number: '1.1-1'}}</h2>
-    <mat-form-field>
-        <mat-label>How much portion to use as planned time?</mat-label>
-        <input type="number" matInput ngModel [(ngModel)]="plannedTimePortion" [value]="plannedTimePortion" name="plannedTimePortion" min="0" max="1" step="0.1">
-    </mat-form-field>
-    <h2>Planned time amount / week {{totalAvailableTime() * (plannedTimePortion) / 60}}</h2>
+        }
+    </div>
+    <div style="display: flex; flex: 1;">
+        <button mat-mini-fab color="primary" (click)="toggleDisplayUnavailableDays()">
+            <mat-icon class="material-icons-outlined">{{showUnavailableDays() ? 'visibility' :
+                'visibility_off'}}</mat-icon>
+        </button>
+    </div>
 
 </div>
