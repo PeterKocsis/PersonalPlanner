@@ -17,6 +17,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { MatIconModule } from '@angular/material/icon';
 import { CommonModule } from '@angular/common';
 import { AvailabilityEditorComponent } from './availability-editor/availability-editor.component';
+import { BalanceEditorComponent } from "./balance-editor/balance-editor.component";
 
 @Component({
   selector: 'app-space-manager',
@@ -31,8 +32,9 @@ import { AvailabilityEditorComponent } from './availability-editor/availability-
     MatIconModule,
     CommonModule,
     MatButtonModule,
-    AvailabilityEditorComponent
-  ],
+    AvailabilityEditorComponent,
+    BalanceEditorComponent
+],
   templateUrl: './space-manager.component.html',
   styleUrl: './space-manager.component.scss',
 })
