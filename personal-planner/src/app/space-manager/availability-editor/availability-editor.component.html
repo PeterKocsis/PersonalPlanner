@@ -12,13 +12,13 @@
                     <input type="text" matInput readonly [value]="totalAvailableTime()/60 | number: '1.1-1'">
                 </mat-form-field>
                 <mat-form-field>
-                    <mat-label>Portion to use</mat-label>
+                    <mat-label>Percent to use</mat-label>
                     <input type="number" matInput ngModel [(ngModel)]="plannedTimePortion" name="plannedTimePortion"
                         min="0" max="100" step="1">
                 </mat-form-field>
                 <mat-form-field>
                     <mat-label>
-                        Assignable time (total * portion)
+                        Assignable time (total * percent)
                     </mat-label>
                     <input type="text" matInput readonly [value]="assignableTime()/60 | number: '1.1-1'">
                 </mat-form-field>

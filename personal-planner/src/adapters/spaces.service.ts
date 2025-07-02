@@ -91,7 +91,7 @@ export class SpacesService {
       )
       .subscribe({
         next: (data) => {
-          this.spaces$.next(spaces);
+          this.spaces$.next([...spaces]);
         },
         error: (error) => {
           this.spaces$.error(error);

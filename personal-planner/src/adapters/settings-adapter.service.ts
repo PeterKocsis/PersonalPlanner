@@ -6,12 +6,15 @@ import {
 } from '../app/interfaces/time-slot';
 import { BehaviorSubject, of } from 'rxjs';
 import { ISettings } from '../app/interfaces/setting.interface';
+import { IBalance } from '../app/interfaces/balance.interface';
+import { AppStateService } from '../services/app-state.service';
 
 @Injectable({
   providedIn: 'root',
 })
 export class SettingsAdapterService {
   private http = inject(HttpClient);
+  // private appStateService = inject(AppStateService);
   
   settings$ = new BehaviorSubject<ISettings | undefined>(undefined);
   
@@ -43,6 +46,8 @@ export class SettingsAdapterService {
     useRatio: 0.5, // 50% of the time is available for tasks
   });
   
+  private balances = signal<IBalance[]>([]);
+  
   constructor() {}
   
   //TODO Implement when settings are available on the backend
@@ -50,6 +55,7 @@ export class SettingsAdapterService {
     const settings: ISettings = {
       frameSettings: {
         availability: this.timeFrameAvailability(),
+        balances: this.balances(),
       },
     };
     this.settings$.next(settings);
@@ -86,6 +92,22 @@ export class SettingsAdapterService {
     if (this.settings$.value) {
       const settingsClone = structuredClone(this.settings$.value);
       settingsClone.frameSettings.availability.useRatio = value;
+      this.settings$.next(settingsClone);
+    }
+  }
+  
+  addBalance(balance: IBalance) {
+    if (this.settings$.value) {
+      const settingsClone = structuredClone(this.settings$.value);
+      settingsClone.frameSettings.balances.push(balance);
+      this.settings$.next(settingsClone);
+    }
+  }
+
+  updateBalances(balances: IBalance[]) {
+    if (this.settings$.value) {
+      const settingsClone = structuredClone(this.settings$.value);
+      settingsClone.frameSettings.balances = balances;
       this.settings$.next(settingsClone);
     }
   }

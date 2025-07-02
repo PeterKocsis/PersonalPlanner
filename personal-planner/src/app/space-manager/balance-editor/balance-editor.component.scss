@@ -1,0 +1,8 @@
+.right-aligned {
+    text-align: right;
+} 
+
+input.right-aligned::-webkit-outer-spin-button,
+input.right-aligned::-webkit-inner-spin-button {
+  display: none;
+}
