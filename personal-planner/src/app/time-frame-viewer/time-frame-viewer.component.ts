@@ -16,10 +16,14 @@ export class TimeFrameViewerComponent {
   appStateService = inject(AppStateService);
 
   test = computed(() => {
-    const timeFrameStatistics: { spaceName: string; taskDuration: number }[] =
+    const timeFrameStatistics: { spaceName: string; taskDuration: number, spaceAvailability: number }[] =
       [];
     this.appStateService.spaces().forEach((space) => {
       let spaceTaskDuration = 0;
+      const spaceBalance = this.appStateService.settings()?.frameSettings.balances.find(
+        (balance) => balance.spaceId === space._id
+      );
+      const spaceAvailability = spaceBalance?.assignedTimePerFrame || 0;
       this.timeFrame().pocketsTasks.forEach((task) => {
         if (task.spaceId === space._id) {
           spaceTaskDuration += task.timeToCompleteMinutes || 0;
@@ -28,6 +32,7 @@ export class TimeFrameViewerComponent {
       timeFrameStatistics.push({
         spaceName: space.displayName,
         taskDuration: spaceTaskDuration,
+        spaceAvailability: spaceAvailability,
       });
     });
     return timeFrameStatistics;

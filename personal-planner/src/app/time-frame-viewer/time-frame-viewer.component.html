@@ -16,7 +16,7 @@
             <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 1rem;">
                 <h3 style="margin-right: 1rem;">{{timeFrameData.spaceName}}</h3>
                 <span style="flex-grow: 1;"></span>
-                <span>{{timeFrameData.taskDuration}}</span>
+                <span>{{`${timeFrameData.taskDuration / 60}h / ${timeFrameData.spaceAvailability / 60}h`}}</span>
             </div>
         }
 
