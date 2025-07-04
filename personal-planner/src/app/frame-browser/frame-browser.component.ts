@@ -15,7 +15,7 @@ import { ITimeFrame } from '../interfaces/time-frame.interface';
 import { AppStateService } from '../../services/app-state.service';
 
 @Component({
-  selector: 'app-planner',
+  selector: 'app-frame-browser',
   imports: [
     MatCardModule,
     FormsModule,
@@ -26,12 +26,12 @@ import { AppStateService } from '../../services/app-state.service';
     MatIconModule,
     CommonModule,
     TimeFrameViewerComponent,
-    RangeSelectorComponent
+    RangeSelectorComponent,
   ],
-  templateUrl: './planner.component.html',
-  styleUrl: './planner.component.scss',
+  templateUrl: './frame-browser.component.html',
+  styleUrl: './frame-browser.component.scss',
 })
-export class PlannerComponent {
+export class FrameBrowserComponent {
   timeFrameService = inject(TimeFrameAdapterService);
   appStateService = inject(AppStateService);
   timeFrames = this.appStateService.timeFrames;
@@ -39,16 +39,13 @@ export class PlannerComponent {
   selectedTimeFrames = computed(() => {
     return this.appStateService.timeFrames().filter((frame) => {
       return this.selectedTimeRanges().some(
-        (range) =>
-          range.year === frame.year && range.index === frame.index
+        (range) => range.year === frame.year && range.index === frame.index
       );
     });
   });
-
 
   onSelectedRangeChanged(selectedRanges: ITimeRange[]) {
     this.selectedTimeRanges.set(selectedRanges);
     this.timeFrameService.getFramesByRanges(selectedRanges);
   }
-
 }
