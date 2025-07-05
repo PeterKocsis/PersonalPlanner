@@ -8,6 +8,7 @@ const userSchema = mongoose.Schema({
     inboxSpaceId: {type: String },
     othersSpaceId: {type: String },
     spacePriorityId: { type: String },
+    settingsId: { type: mongoose.Schema.Types.ObjectId, ref: 'Settings' },
 });
 
 userSchema.plugin(uniqueValidator);

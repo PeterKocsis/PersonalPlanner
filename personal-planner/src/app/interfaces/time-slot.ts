@@ -19,5 +19,7 @@ export interface ITimeFrameAvailabilityTemplate {
   name: string;
   description?: string;
   dailyAvailabilities: IDailyAvailability[];
+  totalAvailableTime?: number; // Total time available for tasks in minutes
   useRatio: number;
+  allocatableTime?: number; // Total available time * useRation in minutes
 }

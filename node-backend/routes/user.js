@@ -8,7 +8,8 @@ const mongoose = require('mongoose');
 const Space = require('../models/space')
 const { body, validationResult } = require('express-validator');
 const rateLimit = require('express-rate-limit');
-const defaultSecret = require('../utilities/auth-utils')
+const defaultSecret = require('../utilities/auth-utils');
+const Settings = require('../models/settings');
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -48,7 +49,12 @@ router.post('/signup', [
 
         const spacePrio = new SpacePriority({ spaceList: [], ownerID: savedUser._id });
         spacePrio.spaceList.push(othersSpace._id);
-        
+
+        const settings = new Settings({
+            ownerId: savedUser._id
+        });
+
+        await settings.save({ session });
         await inboxSpace.save({session});
         await othersSpace.save({session});
         await spacePrio.save({ session });
@@ -57,6 +63,7 @@ router.post('/signup', [
         savedUser.inboxSpaceId = inboxSpace._id;
         savedUser.othersSpaceId = othersSpace._id;
         savedUser.spacePriorityId = spacePrio._id;
+        savedUser.settingsId = settings._id;
         await savedUser.save({ session });
 
         await session.commitTransaction();
