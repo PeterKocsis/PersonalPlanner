@@ -44,7 +44,9 @@ export class BalanceEditorComponent {
   decimal = new DecimalPipe('en-GB');
 
   spaces = this.appStateService.spaces;
-  assignableTime = this.appStateService.assignableTime;
+  assignableTime = computed((): number => {
+    return this.appStateService.settings()?.frameSettings.availability.allocatableTime || 0;
+  });
   balances = computed(() => {
     return this.appStateService.settings()?.frameSettings.balances || [];
   });
@@ -77,16 +79,6 @@ export class BalanceEditorComponent {
   });
 
   constructor() {
-    effect(() => {
-      this.spaces().forEach((space) => {
-        if (!this.balances().find((balance) => space._id === balance.spaceId)) {
-          this.settingsService.addBalance({
-            spaceId: space._id,
-            assignedTimePerFrame: 0,
-          });
-        }
-      });
-    });
     effect(() => {
       this.form.controls.balances.clear();
       this.setFormValues();

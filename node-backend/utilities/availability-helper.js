@@ -54,6 +54,7 @@ function calculateAllocatableTime(dailyAvailabilities, useRatio) {
 
 const createAvailabilitySettings = (initialSettings = initialAvailablitySettings)=> {
     // Create a copy of the initial settings and calculate total available time and allocatable time
+    console.log('Creating availability settings with initial settings:', initialSettings.dailyAvailabilities[0].timeSlots);
     const completeSettings = {...initialSettings};
     completeSettings['totalAvailableTime'] = calculateTotalAvailableTime(completeSettings.dailyAvailabilities);
     completeSettings['allocatableTime'] = calculateAllocatableTime(completeSettings.dailyAvailabilities, completeSettings.useRatio);

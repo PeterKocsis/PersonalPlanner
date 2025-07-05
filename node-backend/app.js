@@ -7,6 +7,7 @@ const spacePriorityRoutes = require('./routes/space-priority');
 const userRoutes = require('./routes/user');
 const timeFramesRoutes = require('./routes/time-frame');
 const timeRangesRoutes = require('./routes/time-ranges');
+const settingsRoute = require('./routes/settings');
 
 const app = express();
 const mongoose = require('mongoose');
@@ -36,6 +37,7 @@ app.use('/api/spacePriority', spacePriorityRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/timeFrames', timeFramesRoutes);
 app.use('/api/time-range', timeRangesRoutes);
+app.use('/api/settings', settingsRoute);
 
 
 module.exports = app;

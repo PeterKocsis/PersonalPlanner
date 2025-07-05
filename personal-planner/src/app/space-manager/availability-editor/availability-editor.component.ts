@@ -64,27 +64,12 @@ export class AvailabilityEditorComponent {
     this.settingsAdapterService.updateAvailability($event, dayIndex);
   }
 
-  totalAvailableTime = this.appStateService.totalAvailableTime;
-  assignableTime = this.appStateService.assignableTime;
-
-
-  // totalAvailableTime = computed((): number => {
-  //   return this.dailyAvailabilities().reduce((total, availability) => {
-  //     if (availability.isAvailable) {
-  //       return (
-  //         total +
-  //         availability.timeSlots.reduce(
-  //           (dayTotal, slot) =>
-  //             dayTotal +
-  //             (slot.end.hour - slot.start.hour) * 60 +
-  //             (slot.end.minutes - slot.start.minutes),
-  //           0
-  //         )
-  //       );
-  //     }
-  //     return total;
-  //   }, 0);
-  // });
+  totalAvailableTime = computed((): number => {
+    return this.appStateService.settings()?.frameSettings.availability.totalAvailableTime || 0;
+  });
+  assignableTime = computed((): number => {
+    return this.appStateService.settings()?.frameSettings.availability.allocatableTime || 0;
+  });
 
   toggleDisplayUnavailableDays() {
     this.showUnavailableDays.update((current) => !current);
