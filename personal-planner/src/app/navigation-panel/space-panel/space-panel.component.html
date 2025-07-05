@@ -1,8 +1,6 @@
 
 <mat-nav-list>
     @for (space of spaces(); track space._id) {
-        <mat-list-item [routerLink]="['/spaces', space._id]" routerLinkActive="selected">
-            <a matListItemTitle >{{space.displayName}}</a>
-        </mat-list-item>
+        <a [routerLink]="['/spaces', space._id]" routerLinkActive="active-link" mat-list-item >{{space.displayName}}</a>
     }
 </mat-nav-list>

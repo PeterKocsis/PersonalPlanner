@@ -23,7 +23,7 @@ import { AppStateService } from '../../../services/app-state.service';
     MatButtonModule,
     RouterLink,
     RouterLinkActive,
-    MatListItemTitle,
+    
   ],
   templateUrl: './space-panel.component.html',
   styleUrl: './space-panel.component.scss',

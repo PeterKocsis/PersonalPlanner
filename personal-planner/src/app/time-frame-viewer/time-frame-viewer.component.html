@@ -14,7 +14,7 @@
         @for (timeFrameData of test(); track timeFrameData.spaceName) {
             <!-- Display the space name and the task duration in a row -->
             <div style="display: flex; flex-direction: row; align-items: center; margin-bottom: 1rem;">
-                <h3 style="margin-right: 1rem;">{{timeFrameData.spaceName}}</h3>
+                <h3 style="margin: 0px">{{timeFrameData.spaceName}}</h3>
                 <span style="flex-grow: 1;"></span>
                 <span>{{`${timeFrameData.taskDuration / 60}h / ${timeFrameData.spaceAvailability / 60}h`}}</span>
             </div>
