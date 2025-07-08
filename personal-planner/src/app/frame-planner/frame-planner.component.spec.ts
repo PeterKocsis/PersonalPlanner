@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { UpcomingComponent } from './upcoming.component';
+import { FramePlannerComponent } from './frame-planner.component';
 
-describe('UpcomingComponent', () => {
-  let component: UpcomingComponent;
-  let fixture: ComponentFixture<UpcomingComponent>;
+describe('FramePlannerComponent', () => {
+  let component: FramePlannerComponent;
+  let fixture: ComponentFixture<FramePlannerComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [UpcomingComponent]
+      imports: [FramePlannerComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(UpcomingComponent);
+    fixture = TestBed.createComponent(FramePlannerComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });

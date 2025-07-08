@@ -5,10 +5,10 @@ import { SpaceViewComponent } from './space-view/space-view.component';
 import { SettingsComponent } from './settings/settings.component';
 import { InboxComponent } from './inbox/inbox.component';
 import { FrameBrowserComponent } from './frame-browser/frame-browser.component';
-import { UpcomingComponent } from './upcoming/upcoming.component';
 import { SignupComponent } from './auth/signup/signup.component';
 import { LoginComponent } from './auth/login/login.component';
 import { authGuard } from './auth/auth.guard';
+import { FramePlannerComponent } from './frame-planner/frame-planner.component';
 
 export const routes: Routes = [
   {
@@ -50,12 +50,13 @@ export const routes: Routes = [
   {
     path: 'frame-browser',
     component: FrameBrowserComponent,
+    
     canActivate: [authGuard],
     pathMatch: 'full',
   },
   {
-    path: 'upcoming',
-    component: UpcomingComponent,
+    path: 'frame-planner',
+    component: FramePlannerComponent,
     canActivate: [authGuard],
     pathMatch: 'full',
   },

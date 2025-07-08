@@ -14,10 +14,10 @@ import { AppStateService } from '../../services/app-state.service';
 export class TimeFrameViewerComponent {
   timeFrame = input.required<ITimeFrame>();
   appStateService = inject(AppStateService);
-
+  
   test = computed(() => {
     const timeFrameStatistics: { spaceName: string; taskDuration: number, spaceAvailability: number }[] =
-      [];
+    [];
     this.appStateService.spaces().forEach((space) => {
       let spaceTaskDuration = 0;
       const spaceBalance = this.appStateService.settings()?.frameSettings.balances.find(
@@ -37,4 +37,8 @@ export class TimeFrameViewerComponent {
     });
     return timeFrameStatistics;
   });
+
+  onOpenPlanner() {
+    
+  }
 }
