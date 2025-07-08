@@ -48,7 +48,7 @@ export const routes: Routes = [
     pathMatch: 'full',
   },
   {
-    path: 'planner',
+    path: 'frame-browser',
     component: FrameBrowserComponent,
     canActivate: [authGuard],
     pathMatch: 'full',
