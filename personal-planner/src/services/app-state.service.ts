@@ -1,4 +1,5 @@
 import {
+  computed,
   effect,
   inject,
   Injectable,
@@ -27,6 +28,9 @@ export class AppStateService implements OnDestroy {
   timeFrames = signal<ITimeFrame[]>([]);
   settings = signal<ISettings | undefined>(undefined);
   activatedSpaceId = signal<string | null>(null);
+  targetSpaceId = computed(() => {
+    return this.activatedSpaceId() || this.inboxSpace()?._id || null;
+  });
 
   private _authService = inject(AuthService);
   private _taskAdapterService = inject(TaskAdapterService);
@@ -81,12 +85,6 @@ export class AppStateService implements OnDestroy {
         this._spacesService.getInbox();
         this._taskAdapterService.getAllTask();
         this._settingsAdapterService.getSettingsFromServer();
-      }
-    });
-    effect(() => {
-      const inboxSpaceId = this.inboxSpace()?._id;
-      if (!this.activatedSpaceId() && inboxSpaceId) {
-        this.activatedSpaceId.set(inboxSpaceId);
       }
     });
   }

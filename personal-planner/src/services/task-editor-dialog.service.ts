@@ -27,7 +27,7 @@ export class TaskEditorDialogService {
       title: '',
       description: '',
       completed: false,
-      spaceId: this.appStateService.activatedSpaceId()!,
+      spaceId: this.appStateService.targetSpaceId()!,
       createdAt: new Date(),
       timeToCompleteMinutes: undefined,
     };
