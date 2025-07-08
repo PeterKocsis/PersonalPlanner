@@ -1,10 +1,8 @@
 import { computed, inject, Injectable } from '@angular/core';
-import { ActivatedRoute, NavigationEnd, Router } from '@angular/router';
 import { ITask } from '../app/interfaces/task.interface';
 import { MatDialog } from '@angular/material/dialog';
 import { TaskEditorDialogComponent } from '../app/task/task-editor-dialog/task-editor-dialog.component';
 import { TaskAdapterService } from '../adapters/task.adapter.service';
-import { filter } from 'rxjs';
 import { AppStateService } from './app-state.service';
 
 @Injectable({
@@ -14,7 +12,6 @@ export class TaskEditorDialogService {
   taskAdapterService = inject(TaskAdapterService);  
   appStateService = inject(AppStateService);
 
-  currentSpaceId: string | undefined = undefined;
   dialog = inject(MatDialog);
 
   spaces = computed(() => [
@@ -24,37 +21,13 @@ export class TaskEditorDialogService {
 
   private _tempTask: ITask | undefined = undefined;
 
-  //TODO This solution is not ideal. It does not handle cases when the browser reloads the page which has spaceId in the URL.
-  constructor(private router: Router, private activatedRoute: ActivatedRoute) {
-    this.router.events
-      .pipe(filter((event) => event instanceof NavigationEnd))
-      .subscribe(() => {
-        const child = this.getChild(this.activatedRoute);
-        child.paramMap.subscribe((params) => {
-          const currentId = params.get('spaceId');
-          console.log('Route param:', currentId);
-          this.currentSpaceId = currentId
-            ? currentId
-            : this.appStateService.inboxSpace()?._id;
-          console.log('Route param in service:', this.currentSpaceId);
-        });
-      });
-  }
-
-  private getChild(route: ActivatedRoute): ActivatedRoute {
-    while (route.firstChild) {
-      route = route.firstChild;
-    }
-    return route;
-  }
-
   private createTask(): ITask {
     return {
       _id: '',
       title: '',
       description: '',
       completed: false,
-      spaceId: this.currentSpaceId!,
+      spaceId: this.appStateService.activatedSpaceId()!,
       createdAt: new Date(),
       timeToCompleteMinutes: undefined,
     };

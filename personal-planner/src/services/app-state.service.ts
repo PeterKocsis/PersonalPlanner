@@ -1,5 +1,4 @@
 import {
-  computed,
   effect,
   inject,
   Injectable,
@@ -16,6 +15,7 @@ import { ITask } from '../app/interfaces/task.interface';
 import { ISpace } from '../app/interfaces/space.interface';
 import { SettingsAdapterService } from '../adapters/settings-adapter.service';
 import { ISettings } from '../app/interfaces/setting.interface';
+import { ActivatedSpaceProviderService } from './activated-space-provider.service';
 
 @Injectable({
   providedIn: 'root',
@@ -26,45 +26,14 @@ export class AppStateService implements OnDestroy {
   inboxSpace = signal<ISpace | undefined>(undefined);
   timeFrames = signal<ITimeFrame[]>([]);
   settings = signal<ISettings | undefined>(undefined);
-  // totalAvailableTime = computed((): number => {
-  //   if (this.settings() === undefined) {
-  //     return 0;
-  //   }
-  //   return this.settings()!.frameSettings.availability.dailyAvailabilities.reduce(
-  //     (total, availability) => {
-  //       if (availability.isAvailable) {
-  //         return (
-  //           total +
-  //           availability.timeSlots.reduce(
-  //             (dayTotal, slot) =>
-  //               dayTotal +
-  //               (slot.end.hour - slot.start.hour) * 60 +
-  //               (slot.end.minutes - slot.start.minutes),
-  //             0
-  //           )
-  //         );
-  //       }
-  //       return total;
-  //     },
-  //     0
-  //   );
-  // });
-
-  // assignableTime = computed((): number => {
-  //   if (this.settings() === undefined) {
-  //     return 0;
-  //   }
-  //   return (
-  //     this.totalAvailableTime() *
-  //     this.settings()!.frameSettings.availability.useRatio
-  //   );
-  // });
+  activatedSpaceId = signal<string | null>(null);
 
   private _authService = inject(AuthService);
   private _taskAdapterService = inject(TaskAdapterService);
   private _timeFrameAdapterService = inject(TimeFrameAdapterService);
   private _settingsAdapterService = inject(SettingsAdapterService);
   private _spacesService = inject(SpacesService);
+  private _activatedSpaceProviderService = inject(ActivatedSpaceProviderService);
 
   private subscribtions: Subscription[] = [];
 
@@ -100,6 +69,9 @@ export class AppStateService implements OnDestroy {
 
       this._settingsAdapterService.settings$.subscribe((settings) => {
         this.settings.set(settings);
+      }),
+      this._activatedSpaceProviderService.activatedSpaceId.subscribe((spaceId) => {
+        this.activatedSpaceId.set(spaceId);
       })
     );
     //Fetch initial data on user authentication
@@ -109,6 +81,12 @@ export class AppStateService implements OnDestroy {
         this._spacesService.getInbox();
         this._taskAdapterService.getAllTask();
         this._settingsAdapterService.getSettingsFromServer();
+      }
+    });
+    effect(() => {
+      const inboxSpaceId = this.inboxSpace()?._id;
+      if (!this.activatedSpaceId() && inboxSpaceId) {
+        this.activatedSpaceId.set(inboxSpaceId);
       }
     });
   }
