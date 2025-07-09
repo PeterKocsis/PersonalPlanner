@@ -5,20 +5,22 @@
         <h2 style="margin: 0px;">Week Availablity</h2>
     </legend>
     <div style="display: flex; flex-direction: row; gap: 1rem; padding: 1rem; align-items: center;">
-        <mat-form-field style="flex: 1;">
-            <mat-label>Total Availability</mat-label>
-            <input type="text" matInput readonly [value]="totalAvailableTime()/60 | number: '1.1-1'">
+        <mat-form-field appearance="outline" style="flex: 1;">
+            <mat-label>Total Availability (Sum of daily availability )</mat-label>
+            <input style="cursor: default;" type="text" matInput readonly [value]="totalAvailableTime()/60 | number: '1.1-1'">
         </mat-form-field>
+        <h2>*</h2>
         <mat-form-field style="flex: 1;">
             <mat-label>Percent to use</mat-label>
             <input type="number" matInput ngModel [(ngModel)]="plannedTimePortion" name="plannedTimePortion" min="0"
                 max="100" step="1">
         </mat-form-field>
-        <mat-form-field style="flex: 1;">
+        <h2>=</h2>
+        <mat-form-field appearance="outline" style="flex: 1;">
             <mat-label>
                 Assignable time (total * percent)
             </mat-label>
-            <input type="text" matInput readonly [value]="assignableTime()/60 | number: '1.1-1'">
+            <input style="cursor: default;" type="text" matInput readonly [value]="assignableTime()/60 | number: '1.1-1'">
         </mat-form-field>
     </div>
 </fieldset>
