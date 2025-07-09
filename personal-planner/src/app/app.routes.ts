@@ -9,6 +9,7 @@ import { SignupComponent } from './auth/signup/signup.component';
 import { LoginComponent } from './auth/login/login.component';
 import { authGuard } from './auth/auth.guard';
 import { FramePlannerComponent } from './frame-planner/frame-planner.component';
+import { resolveSelectedRange } from './time-frame-viewer/time-frame-viewer.component';
 
 export const routes: Routes = [
   {
@@ -56,9 +57,16 @@ export const routes: Routes = [
   },
   {
     path: 'frame-planner',
+    // Note: The query parameters 'start' and 'end' are used to resolve the
+    // selected time range for the frame planner.
+    // The 'resolveSelectedRange' function will fetch the time range based on these parameters.
+    // If they are not provided, it will default to the current week range.
     component: FramePlannerComponent,
+    resolve: {
+      selectedRange: resolveSelectedRange,
+    },
     canActivate: [authGuard],
-    pathMatch: 'full',
+    pathMatch: 'prefix',
   },
   { path: 'auth/signup', component: SignupComponent },
   { path: 'auth/login', component: LoginComponent },

@@ -27,17 +27,17 @@ export class TimeRangeAdapterService {
 
     return firstValueFrom(
       this.http
-        .get<{ message: string; timeRange: IBackendTimeRange[] }>(
+        .get<{ message: string; timeRanges: IBackendTimeRange[] }>(
           `${this.baseUrl}?${queryParams}`
         )
         .pipe(
           map((response) => {
-            if (!isBackendTimeRangeArray(response.timeRange)) {
+            if (!isBackendTimeRangeArray(response.timeRanges)) {
               throw new Error(
                 'Invalid time range data format received in getTimeRanges'
               );
             }
-            return response.timeRange.map((tr) => ({
+            return response.timeRanges.map((tr) => ({
               ...tr,
               startDate: new Date(tr.startDate),
               endDate: new Date(tr.endDate),
