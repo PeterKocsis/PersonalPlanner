@@ -112,6 +112,32 @@ router.delete("/:id", checkAuth, async (req, res, next) => {
   }
 });
 
+function isTimeRangeAssined(storedState, newState) {
+  if (
+    !storedState.assignedTimeRange &&
+    newState.assignedTimeRange
+  ) {
+    return true;
+  }
+  return false;
+}
+
+function isTimeRangeUnassigned(storedState, newState) {
+  return (
+    storedState.assignedTimeRange &&
+    newState.assignedTimeRange === undefined
+  );
+}
+
+function isTimeRangeChanged(storedState, newState) {
+  return (
+    storedState.assignedTimeRange &&
+    newState.assignedTimeRange &&
+    storedState.assignedTimeRange.year !== newState.assignedTimeRange.year || 
+    storedState.assignedTimeRange.index !== newState.assignedTimeRange.index
+  );
+}
+
 router.put("/:id", checkAuth, async (req, res, next) => {
   const task = req.body;
   console.log(`Request to update task to`, task);
@@ -123,50 +149,40 @@ router.put("/:id", checkAuth, async (req, res, next) => {
       _id: req.params.id,
       ownerId: req.userData.userId,
     });
-    //Make changes only if the stored task and the incoming task assignedTimeRanges are different
-    if (
-      storedTask.assignedTimeRange === undefined || task.assignedTimeRange === undefined ||
-      (storedTask.assignedTimeRange &&
-        task.assignedTimeRange &&
-        storedTask.assignedTimeRange.year !== task.assignedTimeRange.year &&
-        storedTask.assignedTimeRange.index !== task.assignedTimeRange.index)
-    ) {
-      // PocketRangeId has been assigned to the task
-      if (!storedTask.assignedTimeRange && task.assignedTimeRange) {
-        modifiedFrames.push(
-          await addTaskToPocket(task, session, req.userData.userId)
-        );
-      }
-      // PocketRangeId has been removed from the task
-      if (storedTask.assignedTimeRange && !task.assignedTimeRange) {
-        modifiedFrames.push(
-          await removeTaskFromPocket(
-            req.params.id,
-            storedTask.assignedTimeRange,
-            session,
-            req.userData.userId
-          )
-        );
-      }
-      // PocketRangeId has changed from one to another
-      if (
-        storedTask.assignedTimeRange &&
-        task.assignedTimeRange &&
-        storedTask.assignedTimeRange !== task.assignedTimeRange
-      ) {
-        modifiedFrames.push(
-          await removeTaskFromPocket(
-            req.params.id,
-            storedTask.assignedTimeRange,
-            session,
-            req.userData.userId
-          )
-        );
-        modifiedFrames.push(
-          await addTaskToPocket(task, session, req.userData.userId)
-        );
-      }
+    // PocketRangeId has been assigned to the task
+    if (isTimeRangeAssined(storedTask, task)) {
+      console.log("Task is in pocket, adding to pocket");
+      modifiedFrames.push(
+        await addTaskToPocket(task, session, req.userData.userId)
+      );
     }
+    else if (isTimeRangeUnassigned(storedTask, task)) {
+      console.log("Task has been unassigned from pocket");
+      modifiedFrames.push(
+        await removeTaskFromPocket(
+          req.params.id,
+          storedTask.assignedTimeRange,
+          session,
+          req.userData.userId
+        )
+      );
+    } else if (isTimeRangeChanged(storedTask, task)) {
+      console.log("Changing assigned time range for task");
+      // Remove the task from the old pocket
+      modifiedFrames.push(
+        await removeTaskFromPocket(
+          req.params.id,
+          storedTask.assignedTimeRange,
+          session,
+          req.userData.userId
+        )
+      );
+      modifiedFrames.push(
+        await addTaskToPocket(task, session, req.userData.userId)
+      );
+      console.log("Modified frames after change:", modifiedFrames);
+    }
+   
 
     // if task spaceId match with the user inboxSpaceRef, then set the spaceId to othersSpaceRef
     const userData = await User.findOne({ email: req.userData.email });

@@ -24,6 +24,13 @@ export class TimeFrameViewerComponent {
   appStateService = inject(AppStateService);
   router = inject(Router);
 
+  pocketsTasks = computed(() => {
+    const tasks = this.appStateService.tasks();
+    return tasks.filter((task) => {
+      return this.timeFrame().pocketsTasks.includes(task._id);
+    });
+  });
+
   test = computed(() => {
     const timeFrameStatistics: {
       spaceName: string;
@@ -38,7 +45,7 @@ export class TimeFrameViewerComponent {
           (balance) => balance.spaceId === space._id
         );
       const spaceAvailability = spaceBalance?.assignedTimePerFrame || 0;
-      this.timeFrame().pocketsTasks.forEach((task) => {
+      this.pocketsTasks().forEach((task) => {
         if (task.spaceId === space._id) {
           spaceTaskDuration += task.timeToCompleteMinutes || 0;
         }

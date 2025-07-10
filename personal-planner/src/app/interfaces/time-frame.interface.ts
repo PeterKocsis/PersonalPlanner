@@ -6,6 +6,6 @@ export interface ITimeFrame {
   index: number;
   startDate: Date;
   endDate: Date;
-  pocketsTasks: ITask[];
+  pocketsTasks: string[];
   taskQueues?: ITaskQueue[];
 }

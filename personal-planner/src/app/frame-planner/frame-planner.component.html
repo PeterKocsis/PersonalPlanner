@@ -5,7 +5,7 @@
 </div>
 <div style="display: flex; gap: 1rem; min-width: 200px">
   <div style="flex: 1;">
-    @for (task of selectedTimeFrame()?.pocketsTasks; track $index) {
+    @for (task of pocketsTasks(); track $index) {
     <app-task-list-item [task]="task"></app-task-list-item>
     }
   </div>

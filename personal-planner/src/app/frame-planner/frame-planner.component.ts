@@ -4,6 +4,7 @@ import { AppStateService } from '../../services/app-state.service';
 import { ITimeFrame } from '../interfaces/time-frame.interface';
 import { TaskListItemComponent } from '../task/task-list-item/task-list-item.component';
 import { TimeFrameAdapterService } from '../../adapters/time-frame.adapter.service';
+import { ITask } from '../interfaces/task.interface';
 
 @Component({
   selector: 'app-frame-planner',
@@ -29,6 +30,15 @@ export class FramePlannerComponent {
     });
     console.log('Selected time frame:', targetFrame);
     return targetFrame;
+  });
+
+  pocketsTasks = computed((): ITask[] => {
+    const tasks = this.appStateService.tasks();
+    const selectedFrame = this.selectedTimeFrame();
+    return tasks.filter((t) => {
+      // Filter tasks that are assigned to the selected time frame
+      return selectedFrame?.pocketsTasks.includes(t._id);
+    });
   });
 
   constructor() {

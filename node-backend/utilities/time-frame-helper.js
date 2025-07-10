@@ -17,11 +17,13 @@ const collectFrameData = async (timeRange, userId, session) => {
   } else {
     let pocketTasks = [];
     for (const pocket of pockets) {
-      pocketTasks = await Task.find({
-        _id: { $in: pocket.taskIds },
-        ownerId: userId,
-      }).session(session);
+      // pocketTasks = await Task.find({
+      //   _id: { $in: pocket.taskIds },
+      //   ownerId: userId,
+      // }).session(session);
+      pocketTasks.push(...pocket.taskIds);
     }
+    console.log("Pocket tasks:", pocketTasks);
     return {
       ...timeRange,
       pocketsTasks: pocketTasks,
@@ -63,8 +65,8 @@ const addTaskToPocket = async (task, session, userId) => {
     // Pocket found, add the task to the existing pocket
     pocket.taskIds.push(task._id);
     await pocket.save({ session });
-    return await collectFrameData(task.assignedTimeRange, userId, session);
   }
+  return await collectFrameData(task.assignedTimeRange, userId, session);
 };
 
 const removeTaskFromPocket = async (taskId, timeRange, session, userId) => {
