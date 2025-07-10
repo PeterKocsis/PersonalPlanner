@@ -37,7 +37,9 @@ export class AppStateService implements OnDestroy {
   private _timeFrameAdapterService = inject(TimeFrameAdapterService);
   private _settingsAdapterService = inject(SettingsAdapterService);
   private _spacesService = inject(SpacesService);
-  private _activatedSpaceProviderService = inject(ActivatedSpaceProviderService);
+  private _activatedSpaceProviderService = inject(
+    ActivatedSpaceProviderService
+  );
 
   private subscribtions: Subscription[] = [];
 
@@ -49,9 +51,44 @@ export class AppStateService implements OnDestroy {
 
       this._taskAdapterService.taskEvents$.subscribe((event) => {
         switch (event.type) {
-          case 'taskAdded':
-          case 'taskUpdated':
+          case 'taskDeleted':
+          case 'taskAdded': {
+            const updatedFrame = event.modifiedFrames?.length ? event.modifiedFrames[0] : undefined;
+            console.log('Task added event:', event);
+            if (updatedFrame) {
+              this.timeFrames.update((frames) => {
+                const targetFrame = frames.findIndex((frame)=> frame.year === updatedFrame.year && frame.index === updatedFrame.index)
+                const newFrames = [...frames];
+                if(targetFrame > -1) {
+                  newFrames.splice(targetFrame, 1, updatedFrame);
+                }
+                return newFrames;
+              });
+            }
+            break;
+          }
+          case 'taskUpdated': {
+            console.log('Task updated event:', event);
+            if (event.modifiedFrames && event.modifiedFrames.length > 0) {
+              this.timeFrames.update((frames) => {
+                const updatedFrames = frames.map((frame) => {
+                  if(!event.modifiedFrames) {
+                    return frame;
+                  }
+                  else {
+                    const modifiedFrame = event.modifiedFrames.find(
+                      (f) => f.year === frame.year && f.index === frame.index
+                    );
+                    return modifiedFrame ? modifiedFrame : frame;
+                  }
+                });
+                return updatedFrames;
+              });
+            }
+            break;
+          }
           case 'taskAssignedToSpace':
+          case 'taskStateChanged':
             if (event.task.assignedTimeRange) {
               this._timeFrameAdapterService.getFrameByRange(
                 event.task.assignedTimeRange
@@ -74,9 +111,11 @@ export class AppStateService implements OnDestroy {
       this._settingsAdapterService.settings$.subscribe((settings) => {
         this.settings.set(settings);
       }),
-      this._activatedSpaceProviderService.activatedSpaceId.subscribe((spaceId) => {
-        this.activatedSpaceId.set(spaceId);
-      })
+      this._activatedSpaceProviderService.activatedSpaceId.subscribe(
+        (spaceId) => {
+          this.activatedSpaceId.set(spaceId);
+        }
+      )
     );
     //Fetch initial data on user authentication
     effect(async () => {

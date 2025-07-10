@@ -1,8 +1,18 @@
-<p>frame-planner works!</p>
-<p>{{selectedRange().year}}</p>
-<p>{{selectedRange().index}}</p>
 <!-- List of assigned tasks -->
 <!-- Display days of the week where the given day has been set as available -->
+<div style="display: flex; gap: 1rem; background: green;">
+  <h2>Header component with week selector</h2>
+</div>
+<div style="display: flex; gap: 1rem; min-width: 200px">
+  <div style="flex: 1;">
+    @for (task of selectedTimeFrame()?.pocketsTasks; track $index) {
+    <app-task-list-item [task]="task"></app-task-list-item>
+    }
+  </div>
+  <div style="width: 100%; background: yellow; flex: 5;">show available days and task in days which already has been
+    assigned</div>
+
+</div>
 
 
 <!-- Every available day should display the assigned tasks to that day.

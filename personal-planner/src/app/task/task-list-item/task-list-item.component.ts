@@ -27,11 +27,13 @@ import { AppStateService } from '../../../services/app-state.service';
 export class TaskListItemComponent {
   task = input.required<ITask>();
   assingTaskTotimeFrame = output<string>();
+
   taskService = inject(TaskAdapterService);
   appStateService = inject(AppStateService);
   taskEditorDialogService = inject(TaskEditorDialogService);
   timeFrameAdapterService = inject(TimeFrameAdapterService);
   dialog = inject(MatDialog);
+
   itemHovered = false;
   spaces = computed(() => [
     this.appStateService.inboxSpace(),
@@ -60,7 +62,8 @@ export class TaskListItemComponent {
   }
 
   onToggleComplete() {
-    this.taskService.setTaskState(this.task()._id, !this.task().completed);
+    // this.taskService.setTaskState(this.task()._id, !this.task().completed);
+    this.taskService.updateTask({...this.task(), completed: !this.task().completed });
   }
 
   onAssignTimeFrame() {

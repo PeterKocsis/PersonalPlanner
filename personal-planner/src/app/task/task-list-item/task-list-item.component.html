@@ -1,6 +1,5 @@
 <div #item [style.background-color]="itemHovered ? '#ccc' : 'white'" class="task-format" (mouseenter)="onMouseEnter()"
     (mouseleave)="onMouseLeave()" style="overflow: visible;">
-    <mat-checkbox class="task-data"></mat-checkbox>
     <h3 class="task-data">{{task().title}}</h3>
     <div style="display: flex; margin-left: auto; flex-direction: row; align-items: center;"
         [style.visibility]="itemHovered ? 'visible' : 'hidden'">

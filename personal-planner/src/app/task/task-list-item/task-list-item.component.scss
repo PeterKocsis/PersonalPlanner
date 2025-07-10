@@ -1,7 +1,8 @@
 .task-format {
     display: grid;
     height: 50px;
-    grid-template-columns: 50px 1fr 1fr 50px;
+    grid-template-columns: 1fr 1fr 50px;
+    padding-left: 1rem;
 }
 
 .task-data {

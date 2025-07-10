@@ -12,7 +12,7 @@ const {
 const { default: mongoose } = require("mongoose");
 
 router.get("", checkAuth, (req, res, next) => {
-  Task.find()
+  Task.find({ ownerId: req.userData.userId })
     .then((tasks) => {
       res.status(200).json({
         message: "Tasks fetched successfully!",
@@ -60,7 +60,8 @@ router.post("", checkAuth, async (req, res, next) => {
     console.log("Task saved:", savedTask);
     const modifiedFrame = await collectFrameData(
       task.assignedTimeRange,
-      req.userData.userId
+      req.userData.userId,
+      session
     );
     await session.commitTransaction();
     session.endSession();
@@ -87,7 +88,7 @@ router.delete("/:id", checkAuth, async (req, res, next) => {
       _id: taskId,
       ownerId: req.userData.userId,
     });
-    await removeTaskFromPocket(
+    const modifiedFrame = await removeTaskFromPocket(
       taskId,
       task.assignedTimeRange,
       session,
@@ -101,6 +102,7 @@ router.delete("/:id", checkAuth, async (req, res, next) => {
     console.log("Task deleted successfully");
     res.status(200).json({
       message: "Task deleted successfully!",
+      modifiedFrame: modifiedFrame,
     });
   } catch (error) {
     console.error("Error deleting task:", error);
@@ -115,28 +117,57 @@ router.put("/:id", checkAuth, async (req, res, next) => {
   console.log(`Request to update task to`, task);
   const session = await mongoose.startSession();
   session.startTransaction();
+  const modifiedFrames = [];
   try {
     const storedTask = await Task.findOne({
       _id: req.params.id,
       ownerId: req.userData.userId,
     });
-    // PocketRangeId has been assigned to the task
-    if (!storedTask.assignedTimeRange && task.assignedTimeRange) {
-      await addTaskToPocket(task, session, req.userData.userId);
-    }
-    // PocketRangeId has been removed from the task
-    if (storedTask.assignedTimeRange && !task.assignedTimeRange) {
-      await removeTaskFromPocket(req.params.id, session, req.userData.userId);
-    }
-    // PocketRangeId has changed from one to another
+    //Make changes only if the stored task and the incoming task assignedTimeRanges are different
     if (
-      storedTask.assignedTimeRange &&
-      task.assignedTimeRange &&
-      storedTask.assignedTimeRange !== task.assignedTimeRange
+      storedTask.assignedTimeRange === undefined || task.assignedTimeRange === undefined ||
+      (storedTask.assignedTimeRange &&
+        task.assignedTimeRange &&
+        storedTask.assignedTimeRange.year !== task.assignedTimeRange.year &&
+        storedTask.assignedTimeRange.index !== task.assignedTimeRange.index)
     ) {
-      await removeTaskFromPocket(req.params.id, session, req.userData.userId);
-      await addTaskToPocket(task, session, req.userData.userId);
+      // PocketRangeId has been assigned to the task
+      if (!storedTask.assignedTimeRange && task.assignedTimeRange) {
+        modifiedFrames.push(
+          await addTaskToPocket(task, session, req.userData.userId)
+        );
+      }
+      // PocketRangeId has been removed from the task
+      if (storedTask.assignedTimeRange && !task.assignedTimeRange) {
+        modifiedFrames.push(
+          await removeTaskFromPocket(
+            req.params.id,
+            storedTask.assignedTimeRange,
+            session,
+            req.userData.userId
+          )
+        );
+      }
+      // PocketRangeId has changed from one to another
+      if (
+        storedTask.assignedTimeRange &&
+        task.assignedTimeRange &&
+        storedTask.assignedTimeRange !== task.assignedTimeRange
+      ) {
+        modifiedFrames.push(
+          await removeTaskFromPocket(
+            req.params.id,
+            storedTask.assignedTimeRange,
+            session,
+            req.userData.userId
+          )
+        );
+        modifiedFrames.push(
+          await addTaskToPocket(task, session, req.userData.userId)
+        );
+      }
     }
+
     // if task spaceId match with the user inboxSpaceRef, then set the spaceId to othersSpaceRef
     const userData = await User.findOne({ email: req.userData.email });
     console.log("User data:", userData);
@@ -162,7 +193,11 @@ router.put("/:id", checkAuth, async (req, res, next) => {
     await session.commitTransaction();
     await session.endSession();
     console.log("Task updated successfully");
-    res.status(200).json(storedTask);
+    res.status(200).json({
+      message: "Task updated successfully",
+      task: storedTask,
+      modifiedFrames: modifiedFrames,
+    });
   } catch (error) {
     console.log("Error during task update", error);
     res.status(500).json({
@@ -171,41 +206,41 @@ router.put("/:id", checkAuth, async (req, res, next) => {
   }
 });
 
-router.put("/:id/space", checkAuth, async (req, res, next) => {
-  console.log(req);
-  const spaceId = req.body.spaceId;
-  console.log(`Update task with this: ${spaceId}`);
-  try {
-    const updatedTask = await Task.findOne({ _id: req.params.id }).updateOne({
-      spaceId: spaceId,
-    });
-    console.log("Task updated");
-    res.status(200).json(updatedTask);
-  } catch (error) {
-    console.log("Error during task update", error);
-    res.status(500).json({
-      message: "Error during task update",
-    });
-  }
-});
+// router.put("/:id/space", checkAuth, async (req, res, next) => {
+//   console.log(req);
+//   const spaceId = req.body.spaceId;
+//   console.log(`Update task with this: ${spaceId}`);
+//   try {
+//     const updatedTask = await Task.findOne({ _id: req.params.id }).updateOne({
+//       spaceId: spaceId,
+//     });
+//     console.log("Task updated");
+//     res.status(200).json(updatedTask);
+//   } catch (error) {
+//     console.log("Error during task update", error);
+//     res.status(500).json({
+//       message: "Error during task update",
+//     });
+//   }
+// });
 
-router.put("/:id/state", checkAuth, async (req, res, next) => {
-  console.log(req);
-  const newTaskState = req.body.state;
-  console.log(`Update task with this: ${newTaskState}`);
-  try {
-    await Task.findOne({ _id: req.params.id }).updateOne({
-      completed: newTaskState,
-    });
-    console.log("Task updated");
-    const updatedTask = await Task.findOne({ _id: req.params.id });
-    res.status(200).json(updatedTask);
-  } catch (error) {
-    console.log("Error during completion state change", error);
-    res.status(500).json({
-      message: "Error during completion state change",
-    });
-  }
-});
+// router.put("/:id/state", checkAuth, async (req, res, next) => {
+//   console.log(req);
+//   const newTaskState = req.body.state;
+//   console.log(`Update task with this: ${newTaskState}`);
+//   try {
+//     await Task.findOne({ _id: req.params.id }).updateOne({
+//       completed: newTaskState,
+//     });
+//     console.log("Task updated");
+//     const updatedTask = await Task.findOne({ _id: req.params.id });
+//     res.status(200).json(updatedTask);
+//   } catch (error) {
+//     console.log("Error during completion state change", error);
+//     res.status(500).json({
+//       message: "Error during completion state change",
+//     });
+//   }
+// });
 
 module.exports = router;

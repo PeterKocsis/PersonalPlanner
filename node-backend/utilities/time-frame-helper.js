@@ -7,7 +7,7 @@ const collectFrameData = async (timeRange, userId, session) => {
     ownerId: userId,
     year: timeRange.year,
     index: timeRange.index,
-  });
+  }).session(session);
   console.log("Pockets for time range:", pockets);
   if (pockets && pockets.length === 0) {
     return {
@@ -20,7 +20,7 @@ const collectFrameData = async (timeRange, userId, session) => {
       pocketTasks = await Task.find({
         _id: { $in: pocket.taskIds },
         ownerId: userId,
-      });
+      }).session(session);
     }
     return {
       ...timeRange,
@@ -63,6 +63,7 @@ const addTaskToPocket = async (task, session, userId) => {
     // Pocket found, add the task to the existing pocket
     pocket.taskIds.push(task._id);
     await pocket.save({ session });
+    return await collectFrameData(task.assignedTimeRange, userId, session);
   }
 };
 
@@ -73,6 +74,7 @@ const removeTaskFromPocket = async (taskId, timeRange, session, userId) => {
     year: year,
     index: index,
   }).session(session);
+  let modifiedFrame = undefined;
   if (pocket) {
     const taskIndex = pocket.taskIds.indexOf(taskId);
     if (taskIndex > -1) {
@@ -83,9 +85,11 @@ const removeTaskFromPocket = async (taskId, timeRange, session, userId) => {
     if (pocket.taskIds.length === 0) {
       await SchedulePocketModel.deleteOne({ _id: pocket._id }).session(session);
     }
+    modifiedFrame = await collectFrameData(timeRange, userId, session);
+    console.log("Modified frame after removing task:", modifiedFrame);
   }
   console.log(`Task ${taskId} removed from pocket`);
-  return pocket;
+  return modifiedFrame;
 };
 
 module.exports = {

@@ -59,8 +59,8 @@ export class TimeFrameAdapterService {
   }
 
   getFrameByRange(range: ITimeRange): void {
-    const startDate = range.startDate;
-    const endDate = range.endDate;
+    const startDate = new Date(range.startDate);
+    const endDate = new Date(range.endDate);
 
     this.getTimeFrames(startDate, endDate);
   }
