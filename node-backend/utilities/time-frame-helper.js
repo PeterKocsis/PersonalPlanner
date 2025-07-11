@@ -17,10 +17,6 @@ const collectFrameData = async (timeRange, userId, session) => {
   } else {
     let pocketTasks = [];
     for (const pocket of pockets) {
-      // pocketTasks = await Task.find({
-      //   _id: { $in: pocket.taskIds },
-      //   ownerId: userId,
-      // }).session(session);
       pocketTasks.push(...pocket.taskIds);
     }
     console.log("Pocket tasks:", pocketTasks);

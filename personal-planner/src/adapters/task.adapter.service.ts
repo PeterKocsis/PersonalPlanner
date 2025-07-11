@@ -74,39 +74,6 @@ export class TaskAdapterService {
       });
   }
 
-  // assignToSpace(taskId: string, spaceId: string) {
-  //   this.http
-  //     .put<ITask>(`http://localhost:3000/api/tasks/${taskId}/space`, {
-  //       spaceId: spaceId,
-  //     })
-  //     .subscribe({
-  //       next: (result) => {
-  //         this.tasks$.next(
-  //           this.tasks$.value.map((task) => {
-  //             let mappedTask = { ...task };
-  //             if (mappedTask._id === taskId) {
-  //               mappedTask = { ...mappedTask, spaceId: spaceId };
-  //             }
-  //             return mappedTask;
-  //           })
-  //         );
-  //         console.log(
-  //           `Task (${taskId}) successfully assigned to space (${spaceId})`
-  //         );
-  //         this.taskEvents$.next({
-  //           type: 'taskAssignedToSpace',
-  //           task: result,
-  //         });
-  //       },
-  //       error: (error) => {
-  //         console.error(
-  //           `Failed to assign spaceId (${spaceId}) to task (${taskId})`,
-  //           error
-  //         );
-  //       },
-  //     });
-  // }
-
   addTask(task: ITask): void {
     this.http
       .post<{ message: string; task: ITask; modifiedFrame?: ITimeFrame }>(
@@ -179,30 +146,4 @@ export class TaskAdapterService {
       },
     });
   }
-
-  // setTaskState(_id: string, newState: boolean): void {
-  //   this.http
-  //     .put<ITask>(`http://localhost:3000/api/tasks/${_id}/state`, {
-  //       state: newState,
-  //     })
-  //     .subscribe({
-  //       next: (responseTask) => {
-  //         this.tasks$.next(
-  //           this.tasks$.value.map((task) =>
-  //             task._id === _id ? responseTask : task
-  //           )
-  //         );
-  //         console.log(
-  //           `Task state updated successfully for task with id: ${_id}`
-  //         );
-  //         this.taskEvents$.next({
-  //           type: 'taskStateChanged',
-  //           task: responseTask,
-  //         });
-  //       },
-  //       error: (error) => {
-  //         console.error('Error updating task state:', error);
-  //       },
-  //     });
-  // }
 }

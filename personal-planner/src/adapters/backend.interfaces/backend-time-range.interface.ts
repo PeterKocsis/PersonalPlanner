@@ -15,10 +15,6 @@ export function isBackendTimeRange(data: unknown): data is IBackendTimeRange {
     ('index' in data) &&
     ('startDate' in data) &&
     ('endDate' in data)
-    // (typeof (data as IBackendTimeRange).year === 'number') &&
-    // (typeof (data as IBackendTimeRange).index === 'number') &&
-    // (typeof (data as IBackendTimeRange).startDate === 'string') &&
-    // (typeof (data as IBackendTimeRange).endDate === 'string')
   );
 }
 
