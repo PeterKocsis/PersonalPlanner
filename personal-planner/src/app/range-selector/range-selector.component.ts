@@ -1,6 +1,7 @@
 import {
   Component,
   computed,
+  effect,
   inject,
   input,
   OnInit,
@@ -25,13 +26,34 @@ export type TimeUnit = 'week' | 'month';
 export class RangeSelectorComponent implements OnInit {
   timeUnit = input.required<TimeUnit>();
   timeRangeAdapterService = inject(TimeRangeAdapterService);
+
+  initialRanges = input<ITimeRange[]>([]);
   selectedRanges = signal<ITimeRange[]>([]);
-  currentRanges = signal<ITimeRange[]>([]);
+  currentRanges = signal<ITimeRange[]>([]); 
 
   selectionChanged = output<ITimeRange[]>();
 
-  ngOnInit(): void {
-    this.current();
+  constructor() {
+    effect(()=>{
+      if (this.initialRanges()) {
+        this.selectedRanges.set(this.initialRanges());
+      } else {
+        this.selectedRanges.set(this.currentRanges());
+      }
+    });
+
+    effect(() => {
+      if (this.selectedRanges().length > 0) {
+        this.selectionChanged.emit(this.selectedRanges());
+      }
+    });
+  };
+
+  async ngOnInit(): Promise<void> {
+    await this.getCurrentValue();
+    if (this.selectedRanges().length === 0) {
+      this.selectedRanges.set(this.currentRanges());
+    }
   }
 
   async next() {
@@ -40,14 +62,12 @@ export class RangeSelectorComponent implements OnInit {
         this.selectedRanges()[0].endDate
       );
       this.selectedRanges.set([nextRanges]);
-      this.selectionChanged.emit([nextRanges]);
     }
     if (this.timeUnit() === 'month') {
       const nextRanges = await this.timeRangeAdapterService.getNextMonthRange(
         this.selectedRanges()[0].endDate
       );
       this.selectedRanges.set(nextRanges);
-      this.selectionChanged.emit(nextRanges);
     }
   }
   async previous() {
@@ -57,7 +77,6 @@ export class RangeSelectorComponent implements OnInit {
           this.selectedRanges()[0].startDate
         );
       this.selectedRanges.set([previousRanges]);
-      this.selectionChanged.emit([previousRanges]);
     }
     if (this.timeUnit() === 'month') {
       const previousRanges =
@@ -65,25 +84,21 @@ export class RangeSelectorComponent implements OnInit {
           this.selectedRanges()[0].endDate
         );
       this.selectedRanges.set(previousRanges);
-      this.selectionChanged.emit(previousRanges);
     }
   }
 
-  async current() {
+  async getCurrentValue() {
     if (!this.selectedRanges().length) {
       if (this.timeUnit() === 'week') {
         const currentWeekRange =
           await this.timeRangeAdapterService.getCurrentWeekRange();
         this.currentRanges.set([currentWeekRange]);
-        this.selectedRanges.set([currentWeekRange]);
       } else if (this.timeUnit() === 'month') {
         const currentMonthRange =
           await this.timeRangeAdapterService.getCurrentMonthRange();
         this.currentRanges.set(currentMonthRange);
-        this.selectedRanges.set(currentMonthRange);
       }
     }
-    this.selectionChanged.emit(this.currentRanges());
   }
 
   async resetSelectedDate() {
